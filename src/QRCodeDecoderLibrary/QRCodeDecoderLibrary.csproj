@@ -4,7 +4,21 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        
+        <Authors>Bastani, Uzi-Granot</Authors>
+
+        <PackageId>QRCodeDecoderLibrarySkia</PackageId>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageProjectUrl>https://github.com/Bastani/QRCode</PackageProjectUrl>
+        
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>git@github.com:Bastani/QRCode.git</RepositoryUrl>
     </PropertyGroup>
+    <ItemGroup>
+        <None Include="../../LICENSE" Pack="true" PackagePath="" />
+        <None Include="../../README.md" Pack="true" PackagePath="" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="SkiaSharp" Version="2.88.9" />
