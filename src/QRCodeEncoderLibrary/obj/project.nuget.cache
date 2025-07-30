@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "aA51KkX6exQ=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Houman Jafarnia\\RiderProjects\\QRCode\\src\\QRCodeEncoderLibrary\\QRCodeEncoderLibrary.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Houman Jafarnia\\.nuget\\packages\\microsoft.win32.systemevents\\9.0.7\\microsoft.win32.systemevents.9.0.7.nupkg.sha512",
+    "C:\\Users\\Houman Jafarnia\\.nuget\\packages\\system.drawing.common\\9.0.7\\system.drawing.common.9.0.7.nupkg.sha512"
+  ],
+  "logs": []
+}
