@@ -1,4 +1,7 @@
-# QRCode
+# QRCode - Cross-Platform
+This is a fork of the QRCode library that has been modified to remove references of Windows Forms and instead use SkiaSharp so that it is cross-platform.
+
+Original Readme -
 # QR Code Encoder and Decoder C# Class Library for VS 2022 .NET 6.0 (Version 3.1.0)
 
 The QR Code libraries allows your program to create (encode) QR Code image or, 
