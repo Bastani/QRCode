@@ -52,6 +52,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text;
+using SkiaSharp;
 
 namespace QRCodeDecoderLibrary;
 
@@ -267,7 +268,7 @@ public class QRDecoder
 		if (fileName == null) throw new ApplicationException("QRDecode.ImageDecoder File name is null");
 
 		// load file image to bitmap
-		Bitmap inputImageBitmap = new(fileName);
+		var inputImageBitmap = SKBitmap.Decode(fileName);
 
 		// decode bitmap
 		return ImageDecoder(inputImageBitmap);
@@ -280,7 +281,7 @@ public class QRDecoder
 	/// <returns>Output byte arrays</returns>
 	public QRCodeResult[] ImageDecoder
 	(
-		Bitmap inputImageBitmap
+		SKBitmap inputImageBitmap
 	)
 	{
 #if DEBUG
@@ -443,67 +444,60 @@ public class QRDecoder
 
 	internal bool ConvertImageToBlackAndWhite
 	(
-		Bitmap inputImage
+		SKBitmap inputImage
 	)
 	{
-		// lock image bits
-		var bitmapData = inputImage.LockBits(new Rectangle(0, 0, ImageWidth, ImageHeight),
-			ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+	    // address of first line
+	    var bitArrayPtr = inputImage.GetPixels();
+	    
+	    // length in bytes of one scan line
+	    var scanLineWidth = inputImage.RowBytes;
+	    if (scanLineWidth < 0)
+	    {
+	    #if DEBUG
+	        QRCodeTrace.Write("Convert image to black and white array. Invalid input image format (upside down).");
+	    #endif
+	        return false;
+	    }
 
-		// address of first line
-		var bitArrayPtr = bitmapData.Scan0;
-
-		// length in bytes of one scan line
-		var scanLineWidth = bitmapData.Stride;
-		if (scanLineWidth < 0)
-		{
-#if DEBUG
-			QRCodeTrace.Write("Convert image to back and white array. Invalid input image format (upside down).");
-#endif
-			return false;
-		}
-
-		// image total bytes
-		var totalBytes = scanLineWidth * ImageHeight;
-		var bitmapArray = new byte[totalBytes];
-
-		// Copy the RGB values into the array.
-		Marshal.Copy(bitArrayPtr, bitmapArray, 0, totalBytes);
-
-		// unlock image
-		inputImage.UnlockBits(bitmapData);
+	    // image total bytes
+	    var totalBytes = scanLineWidth * ImageHeight;
+	    var bitmapArray = new byte[totalBytes];
+	    
+	    // Copy the RGB values into the array.
+	    Marshal.Copy(bitArrayPtr, bitmapArray, 0, totalBytes);
 
 #if DEBUGRGB
 		BinaryWriter BW = new BinaryWriter(new FileStream("TestImage.rgb", FileMode.Create));
 		int ImageWidthUp = 3 * 32 * ((ImageWidth + 31) / 32);
 		byte[] ImageBuf = new byte[ImageWidthUp];
 #endif
+	    
+	    // allocate gray image 
+	    var grayImage = new byte[ImageHeight, ImageWidth];
+	    var grayLevel = new int[256];
 
-		// allocate gray image 
-		var grayImage = new byte[ImageHeight, ImageWidth];
-		var grayLevel = new int[256];
-
-		// convert to gray
-		var delta = scanLineWidth - 3 * ImageWidth;
-		var bitmapPtr = 0;
-		for (var row = 0; row < ImageHeight; row++)
-		{
+	    // convert to gray
+	    var delta = scanLineWidth - 3 * ImageWidth;
+	    var bitmapPtr = 0;
+	    for (var row = 0; row < ImageHeight; row++)
+	    {
 #if DEBUGRGB
 				Array.Copy(BitmapArray, BitmapPtr, ImageBuf, 0, 3 * ImageWidth);
 				BW.Write(ImageBuf);
 #endif
 
-			for (var col = 0; col < ImageWidth; col++)
-			{
-				var module = (30 * bitmapArray[bitmapPtr] + 59 * bitmapArray[bitmapPtr + 1] +
-				              11 * bitmapArray[bitmapPtr + 2]) / 100;
-				grayLevel[module]++;
-				grayImage[row, col] = (byte)module;
-				bitmapPtr += 3;
-			}
-
-			bitmapPtr += delta;
-		}
+	        for (var col = 0; col < ImageWidth; col++)
+	        {
+		        var module = (30 * bitmapArray[bitmapPtr] + 59 * bitmapArray[bitmapPtr + 1] +
+		                      11 * bitmapArray[bitmapPtr + 2]) / 100;
+	            grayLevel[module]++;
+	            grayImage[row, col] = (byte)module;
+	            bitmapPtr += 3;
+	        }
+	        
+	        bitmapPtr += delta;
+	    }
 
 #if DEBUGRGB
 				BW.Close();
@@ -516,21 +510,21 @@ public class QRDecoder
 			;
 		for (levelEnd = 255; levelEnd >= levelStart && grayLevel[levelEnd] == 0; levelEnd--)
 			;
-		levelEnd++;
-		if (levelEnd - levelStart < 2)
-		{
-#if DEBUG
-			QRCodeTrace.Write("Convert image to back and white array. Input image has no color variations");
-#endif
-			return false;
-		}
+	    levelEnd++;
+	    if (levelEnd - levelStart < 2)
+	    {
+	    #if DEBUG
+	        QRCodeTrace.Write("Convert image to black and white array. Input image has no color variations");
+	    #endif
+	        return false;
+	    }
 
-		var cutoffLevel = (levelStart + levelEnd) / 2;
+	    var cutoffLevel = (levelStart + levelEnd) / 2;
 
-		// create boolean image white = false, black = true
-		BlackWhiteImage = new bool[ImageHeight, ImageWidth];
-		for (var row = 0; row < ImageHeight; row++)
-		for (var col = 0; col < ImageWidth; col++)
+	    // create boolean image white = false, black = true
+	    BlackWhiteImage = new bool[ImageHeight, ImageWidth];
+	    for (var row = 0; row < ImageHeight; row++)
+	    for (var col = 0; col < ImageWidth; col++)
 			BlackWhiteImage[row, col] = grayImage[row, col] < cutoffLevel;
 
 		// save as black white image
@@ -540,7 +534,7 @@ public class QRDecoder
 #endif
 
 		// exit;
-		return true;
+	    return true;
 	}
 
 	////////////////////////////////////////////////////////////////////

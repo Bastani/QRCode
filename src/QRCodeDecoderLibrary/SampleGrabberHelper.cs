@@ -222,77 +222,7 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 
 	[DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory")]
 	public static extern void CopyMemory(IntPtr destination, IntPtr source, [MarshalAs(UnmanagedType.U4)] int length);
-
-	/// <summary>
-	///     Makes a snapshot of next frame
-	/// </summary>
-	/// <returns>Bitmap with snapshot</returns>
-	public Bitmap SnapshotNextFrame()
-	{
-		if (_mSampleGrabber == null) throw new ApplicationException("SampleGrabber was not initialized");
-
-		// capture image
-		var ip = GetNextFrame();
-
-		if (ip == IntPtr.Zero) throw new ApplicationException("Can not snap next frame");
-
-		var pixelFormat = _mVideoBitCount switch
-		{
-			24 => PixelFormat.Format24bppRgb,
-			32 => PixelFormat.Format32bppRgb,
-			48 => PixelFormat.Format48bppRgb,
-			_ => throw new ApplicationException("Unsupported BitCount")
-		};
-
-		Bitmap bitmap = new(_mVideoWidth, _mVideoHeight, _mVideoBitCount / 8 * _mVideoWidth, pixelFormat, ip);
-
-		var bitmapClone = bitmap.Clone(new Rectangle(0, 0, _mVideoWidth, _mVideoHeight), PixelFormat.Format24bppRgb);
-		bitmapClone.RotateFlip(RotateFlipType.RotateNoneFlipY);
-
-		// Release any previous buffer
-		if (ip != IntPtr.Zero) Marshal.FreeCoTaskMem(ip);
-
-		bitmap.Dispose();
-
-		return bitmapClone;
-	}
-
-	/// <summary>
-	///     Makes a snapshot of current frame
-	/// </summary>
-	/// <returns>Bitmap with snapshot</returns>
-	public Bitmap SnapshotCurrentFrame()
-	{
-		if (_mSampleGrabber == null) throw new ApplicationException("SampleGrabber was not initialized");
-
-		if (!_mBBufferSamplesOfCurrentFrame)
-			throw new ApplicationException(
-				"SampleGrabberHelper was created without buffering-mode (buffer of current frame)");
-
-		// capture image
-		var ip = GetCurrentFrame();
-
-		var pixelFormat = _mVideoBitCount switch
-		{
-			24 => PixelFormat.Format24bppRgb,
-			32 => PixelFormat.Format32bppRgb,
-			48 => PixelFormat.Format48bppRgb,
-			_ => throw new ApplicationException("Unsupported BitCount")
-		};
-		Bitmap bitmap = new(_mVideoWidth, _mVideoHeight, _mVideoBitCount / 8 * _mVideoWidth, pixelFormat, ip);
-
-		var bitmapClone = bitmap.Clone(new Rectangle(0, 0, _mVideoWidth, _mVideoHeight), PixelFormat.Format24bppRgb);
-		bitmapClone.RotateFlip(RotateFlipType.RotateNoneFlipY);
-
-
-		// Release any previous buffer
-		if (ip != IntPtr.Zero) Marshal.FreeCoTaskMem(ip);
-
-		bitmap.Dispose();
-
-		return bitmapClone;
-	}
-
+	
 	/// <summary>
 	///     Get the image from the Still pin.  The returned image can turned into a bitmap with
 	///     Bitmap b = new Bitmap(cam.Width, cam.Height, cam.Stride, PixelFormat.Format24bppRgb, m_ip);
