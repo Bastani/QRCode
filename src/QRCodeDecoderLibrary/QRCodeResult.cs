@@ -53,7 +53,7 @@ public class QRCodeResult
 	/// <summary>
 	///     ECI Assignment Value
 	/// </summary>
-	public int ECIAssignValue;
+	public int EciAssignValue;
 
 	/// <summary>
 	///     QR Code error correction code (L, M, Q, H)
@@ -72,9 +72,9 @@ public class QRCodeResult
 
 	public QRCodeResult
 	(
-		byte[] DataArray
+		byte[] dataArray
 	)
 	{
-		this.DataArray = DataArray;
+		this.DataArray = dataArray;
 	}
 }

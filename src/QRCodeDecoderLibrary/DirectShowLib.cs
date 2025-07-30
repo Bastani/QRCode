@@ -53,7 +53,7 @@ namespace QRCodeDecoderLibrary;
 /// <summary>
 ///     From AMPROPERTY_PIN
 /// </summary>
-public enum AMPropertyPin
+public enum AmPropertyPin
 {
 	Category,
 	Medium
@@ -63,7 +63,7 @@ public enum AMPropertyPin
 ///     From _AM_RENSDEREXFLAGS
 /// </summary>
 [Flags]
-public enum AMRenderExFlags
+public enum AmRenderExFlags
 {
 	None = 0,
 	RenderToExistingRenderers = 1
@@ -80,9 +80,9 @@ public enum CDef
 	BypassClassManager = 0x0002,
 	ClassLegacy = 0x0004,
 	MeritAboveDoNotUse = 0x0008,
-	DevmonCMGRDevice = 0x0010,
-	DevmonDMO = 0x0020,
-	DevmonPNPDevice = 0x0040,
+	DevmonCmgrDevice = 0x0010,
+	DevmonDmo = 0x0020,
+	DevmonPnpDevice = 0x0040,
 	DevmonFilter = 0x0080,
 	DevmonSelectiveMask = 0x00f0
 }
@@ -100,7 +100,7 @@ public enum FilterState
 /// <summary>
 ///     From KSPROPERTY_SUPPORT_* defines
 /// </summary>
-public enum KSPropertySupport
+public enum KsPropertySupport
 {
 	Get = 1,
 	Set = 2
@@ -127,7 +127,7 @@ public enum PinDirection
 /// <summary>
 ///     From VMR9AspectRatioMode
 /// </summary>
-public enum VMR9AspectRatioMode
+public enum Vmr9AspectRatioMode
 {
 	None,
 	LetterBox
@@ -137,7 +137,7 @@ public enum VMR9AspectRatioMode
 ///     From VMR9Mode
 /// </summary>
 [Flags]
-public enum VMR9Mode
+public enum Vmr9Mode
 {
 	None = 0,
 	Windowed = 0x00000001,
@@ -149,7 +149,7 @@ public enum VMR9Mode
 ///     From VMR9RenderPrefs
 /// </summary>
 [Flags]
-public enum VMR9RenderPrefs
+public enum Vmr9RenderPrefs
 {
 	None = 0,
 	DoNotRenderBorder = 0x00000001 // app paints color keys
@@ -192,7 +192,7 @@ public interface IFilterGraph2 : IGraphBuilder
 		[In] IPin ppinOut,
 		[In] IPin ppinIn,
 		[In] [MarshalAs(UnmanagedType.LPStruct)]
-		AMMediaType pmt
+		AmMediaType pmt
 	);
 
 	[PreserveSig]
@@ -246,13 +246,13 @@ public interface IFilterGraph2 : IGraphBuilder
 	[PreserveSig]
 	int ReconnectEx(
 		[In] IPin ppin,
-		[In] AMMediaType pmt
+		[In] AmMediaType pmt
 	);
 
 	[PreserveSig]
 	int RenderEx(
 		[In] IPin pPinOut,
-		[In] AMRenderExFlags dwFlags,
+		[In] AmRenderExFlags dwFlags,
 		[In] IntPtr pvContext // DWORD *
 	);
 }
@@ -267,7 +267,7 @@ public interface IKsPropertySet
 	int Set(
 		[In] [MarshalAs(UnmanagedType.LPStruct)]
 		Guid guidPropSet,
-		[In] int dwPropID,
+		[In] int dwPropId,
 		[In] IntPtr pInstanceData,
 		[In] int cbInstanceData,
 		[In] IntPtr pPropData,
@@ -278,7 +278,7 @@ public interface IKsPropertySet
 	int Get(
 		[In] [MarshalAs(UnmanagedType.LPStruct)]
 		Guid guidPropSet,
-		[In] int dwPropID,
+		[In] int dwPropId,
 		[In] IntPtr pInstanceData,
 		[In] int cbInstanceData,
 		[In] [Out] IntPtr pPropData,
@@ -290,8 +290,8 @@ public interface IKsPropertySet
 	int QuerySupported(
 		[In] [MarshalAs(UnmanagedType.LPStruct)]
 		Guid guidPropSet,
-		[In] int dwPropID,
-		[Out] out KSPropertySupport pTypeSupport
+		[In] int dwPropId,
+		[Out] out KsPropertySupport pTypeSupport
 	);
 }
 
@@ -302,10 +302,10 @@ public interface IKsPropertySet
 public interface IAMStreamConfig
 {
 	[PreserveSig]
-	int SetFormat([In] [MarshalAs(UnmanagedType.LPStruct)] AMMediaType pmt);
+	int SetFormat([In] [MarshalAs(UnmanagedType.LPStruct)] AmMediaType pmt);
 
 	[PreserveSig]
-	int GetFormat([Out] out AMMediaType pmt);
+	int GetFormat([Out] out AmMediaType pmt);
 
 	[PreserveSig]
 	int GetNumberOfCapabilities(out int piCount, out int piSize);
@@ -313,8 +313,8 @@ public interface IAMStreamConfig
 	[PreserveSig]
 	int GetStreamCaps(
 		[In] int iIndex,
-		[Out] out AMMediaType ppmt,
-		[In] IntPtr pSCC
+		[Out] out AmMediaType ppmt,
+		[In] IntPtr pScc
 	);
 }
 
@@ -369,14 +369,14 @@ public interface IPin
 	int Connect(
 		[In] IPin pReceivePin,
 		[In] [MarshalAs(UnmanagedType.LPStruct)]
-		AMMediaType pmt
+		AmMediaType pmt
 	);
 
 	[PreserveSig]
 	int ReceiveConnection(
 		[In] IPin pReceivePin,
 		[In] [MarshalAs(UnmanagedType.LPStruct)]
-		AMMediaType pmt
+		AmMediaType pmt
 	);
 
 	[PreserveSig]
@@ -392,7 +392,7 @@ public interface IPin
 	[PreserveSig]
 	int ConnectionMediaType(
 		[Out] [MarshalAs(UnmanagedType.LPStruct)]
-		AMMediaType pmt);
+		AmMediaType pmt);
 
 	/// <summary>
 	///     Release returned parameter with DsUtils.FreePinInfo
@@ -404,10 +404,10 @@ public interface IPin
 	int QueryDirection(out PinDirection pPinDir);
 
 	[PreserveSig]
-	int QueryId([Out] [MarshalAs(UnmanagedType.LPWStr)] out string Id);
+	int QueryId([Out] [MarshalAs(UnmanagedType.LPWStr)] out string id);
 
 	[PreserveSig]
-	int QueryAccept([In] [MarshalAs(UnmanagedType.LPStruct)] AMMediaType pmt);
+	int QueryAccept([In] [MarshalAs(UnmanagedType.LPStruct)] AmMediaType pmt);
 
 	[PreserveSig]
 	int EnumMediaTypes([Out] out IEnumMediaTypes ppEnum);
@@ -484,10 +484,10 @@ public interface IMediaSample
 	///     Returned object must be released with DsUtils.FreeAMMediaType()
 	/// </summary>
 	[PreserveSig]
-	int GetMediaType([Out] [MarshalAs(UnmanagedType.LPStruct)] out AMMediaType ppMediaType);
+	int GetMediaType([Out] [MarshalAs(UnmanagedType.LPStruct)] out AmMediaType ppMediaType);
 
 	[PreserveSig]
-	int SetMediaType([In] [MarshalAs(UnmanagedType.LPStruct)] AMMediaType pMediaType);
+	int SetMediaType([In] [MarshalAs(UnmanagedType.LPStruct)] AmMediaType pMediaType);
 
 	[PreserveSig]
 	int IsDiscontinuity();
@@ -526,7 +526,7 @@ public interface IBaseFilter : IMediaFilter
 {
 	[PreserveSig]
 	int GetClassID(
-		[Out] out Guid pClassID);
+		[Out] out Guid pClassId);
 
 	[PreserveSig]
 	int Stop();
@@ -551,7 +551,7 @@ public interface IBaseFilter : IMediaFilter
 
 	[PreserveSig]
 	int FindPin(
-		[In] [MarshalAs(UnmanagedType.LPWStr)] string Id,
+		[In] [MarshalAs(UnmanagedType.LPWStr)] string id,
 		[Out] out IPin ppPin
 	);
 
@@ -683,21 +683,21 @@ public interface ISampleGrabber
 {
 	[PreserveSig]
 	int SetOneShot(
-		[In] [MarshalAs(UnmanagedType.Bool)] bool OneShot);
+		[In] [MarshalAs(UnmanagedType.Bool)] bool oneShot);
 
 	[PreserveSig]
 	int SetMediaType(
 		[In] [MarshalAs(UnmanagedType.LPStruct)]
-		AMMediaType pmt);
+		AmMediaType pmt);
 
 	[PreserveSig]
 	int GetConnectedMediaType(
 		[Out] [MarshalAs(UnmanagedType.LPStruct)]
-		AMMediaType pmt);
+		AmMediaType pmt);
 
 	[PreserveSig]
 	int SetBufferSamples(
-		[In] [MarshalAs(UnmanagedType.Bool)] bool BufferThem);
+		[In] [MarshalAs(UnmanagedType.Bool)] bool bufferThem);
 
 	[PreserveSig]
 	int GetCurrentBuffer(ref int pBufferSize, IntPtr pBuffer);
@@ -706,7 +706,7 @@ public interface ISampleGrabber
 	int GetCurrentSample(out IMediaSample ppSample);
 
 	[PreserveSig]
-	int SetCallback(ISampleGrabberCB pCallback, int WhichMethodToCallback);
+	int SetCallback(ISampleGrabberCB pCallback, int whichMethodToCallback);
 }
 
 [ComImport]
@@ -719,10 +719,10 @@ public interface ISampleGrabberCB
 	///     When called, callee must release pSample
 	/// </summary>
 	[PreserveSig]
-	int SampleCB(double SampleTime, IMediaSample pSample);
+	int SampleCB(double sampleTime, IMediaSample pSample);
 
 	[PreserveSig]
-	int BufferCB(double SampleTime, IntPtr pBuffer, int BufferLen);
+	int BufferCB(double sampleTime, IntPtr pBuffer, int bufferLen);
 }
 
 [ComImport]
@@ -732,7 +732,7 @@ public interface ISampleGrabberCB
 public interface IVMRFilterConfig9
 {
 	[PreserveSig]
-	int SetImageCompositor([In] IVMRImageCompositor9 lpVMRImgCompositor);
+	int SetImageCompositor([In] IVMRImageCompositor9 lpVmrImgCompositor);
 
 	[PreserveSig]
 	int SetNumberOfStreams([In] int dwMaxStreams);
@@ -741,16 +741,16 @@ public interface IVMRFilterConfig9
 	int GetNumberOfStreams([Out] out int pdwMaxStreams);
 
 	[PreserveSig]
-	int SetRenderingPrefs([In] VMR9RenderPrefs dwRenderFlags);
+	int SetRenderingPrefs([In] Vmr9RenderPrefs dwRenderFlags);
 
 	[PreserveSig]
-	int GetRenderingPrefs([Out] out VMR9RenderPrefs pdwRenderFlags);
+	int GetRenderingPrefs([Out] out Vmr9RenderPrefs pdwRenderFlags);
 
 	[PreserveSig]
-	int SetRenderingMode([In] VMR9Mode Mode);
+	int SetRenderingMode([In] Vmr9Mode mode);
 
 	[PreserveSig]
-	int GetRenderingMode([Out] out VMR9Mode Mode);
+	int GetRenderingMode([Out] out Vmr9Mode mode);
 }
 
 [ComImport]
@@ -762,8 +762,8 @@ public interface IVMRWindowlessControl9
 	int GetNativeVideoSize(
 		[Out] out int lpWidth,
 		[Out] out int lpHeight,
-		[Out] out int lpARWidth,
-		[Out] out int lpARHeight
+		[Out] out int lpArWidth,
+		[Out] out int lpArHeight
 	);
 
 	int GetMinIdealVideoSize(
@@ -777,18 +777,18 @@ public interface IVMRWindowlessControl9
 	);
 
 	int SetVideoPosition(
-		[In] DsRect lpSRCRect,
-		[In] DsRect lpDSTRect
+		[In] DsRect lpSrcRect,
+		[In] DsRect lpDstRect
 	);
 
 	int GetVideoPosition(
-		[Out] DsRect lpSRCRect,
-		[Out] DsRect lpDSTRect
+		[Out] DsRect lpSrcRect,
+		[Out] DsRect lpDstRect
 	);
 
-	int GetAspectRatioMode([Out] out VMR9AspectRatioMode lpAspectRatioMode);
+	int GetAspectRatioMode([Out] out Vmr9AspectRatioMode lpAspectRatioMode);
 
-	int SetAspectRatioMode([In] VMR9AspectRatioMode AspectRatioMode);
+	int SetAspectRatioMode([In] Vmr9AspectRatioMode aspectRatioMode);
 
 	int SetVideoClippingWindow([In] IntPtr hwnd); // HWND
 
@@ -801,7 +801,7 @@ public interface IVMRWindowlessControl9
 
 	int GetCurrentImage([Out] out IntPtr lpDib); // BYTE**
 
-	int SetBorderColor([In] int Clr);
+	int SetBorderColor([In] int clr);
 
 	int GetBorderColor([Out] out int lpClr);
 }
@@ -903,25 +903,25 @@ public static class MediaType
 public static class MediaSubType
 {
 	/// <summary> MEDIASUBTYPE_RGB16_D3D_DX7_RT </summary>
-	public static readonly Guid RGB16_D3D_DX7_RT =
+	public static readonly Guid Rgb16D3DDx7Rt =
 		new(0x36315237, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 
 	/// <summary> MEDIASUBTYPE_RGB16_D3D_DX9_RT </summary>
-	public static readonly Guid RGB16_D3D_DX9_RT =
+	public static readonly Guid Rgb16D3DDx9Rt =
 		new(0x36315239, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 
 	/// <summary> MEDIASUBTYPE_RGB24 </summary>
-	public static readonly Guid RGB24 = new(0xe436eb7d, 0x524f, 0x11ce, 0x9f, 0x53, 0x00, 0x20, 0xaf, 0x0b, 0xa7, 0x70);
+	public static readonly Guid Rgb24 = new(0xe436eb7d, 0x524f, 0x11ce, 0x9f, 0x53, 0x00, 0x20, 0xaf, 0x0b, 0xa7, 0x70);
 
 	/// <summary> MEDIASUBTYPE_RGB32 </summary>
-	public static readonly Guid RGB32 = new(0xe436eb7e, 0x524f, 0x11ce, 0x9f, 0x53, 0x00, 0x20, 0xaf, 0x0b, 0xa7, 0x70);
+	public static readonly Guid Rgb32 = new(0xe436eb7e, 0x524f, 0x11ce, 0x9f, 0x53, 0x00, 0x20, 0xaf, 0x0b, 0xa7, 0x70);
 
 	/// <summary> MEDIASUBTYPE_ARGB32 </summary>
-	public static readonly Guid ARGB32 = new(0x773c9ac0, 0x3274, 0x11d0, 0xb7, 0x24, 0x00, 0xaa, 0x00, 0x6c, 0x1a,
+	public static readonly Guid Argb32 = new(0x773c9ac0, 0x3274, 0x11d0, 0xb7, 0x24, 0x00, 0xaa, 0x00, 0x6c, 0x1a,
 		0x01);
 
 	/// <summary> MEDIASUBTYPE_YUY2 </summary>
-	public static readonly Guid YUY2 = new(0x32595559, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+	public static readonly Guid Yuy2 = new(0x32595559, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 }
 
 public static class FormatType
@@ -931,7 +931,7 @@ public static class FormatType
 		0x5a);
 }
 
-public static class PropSetID
+public static class PropSetId
 {
 	/// <summary> AMPROPSETID_Pin</summary>
 	public static readonly Guid Pin = new(0x9b00f101, 0x1567, 0x11d1, 0xb3, 0xf1, 0x00, 0xaa, 0x00, 0x37, 0x61, 0xc5);
@@ -942,7 +942,7 @@ public static class PropSetID
 ///     it should be released with FreeAMMediaType() to avoid leaking
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public class AMMediaType
+public class AmMediaType
 {
 	public Guid majorType;
 	public Guid subType;
@@ -1008,10 +1008,10 @@ public class DsLong
 	///     Constructor
 	///     Initialize a new instance of DirectShowLib.DsLong with the Value parameter
 	/// </summary>
-	/// <param name="Value">Value to assign to this new instance</param>
-	public DsLong(long Value)
+	/// <param name="value">Value to assign to this new instance</param>
+	public DsLong(long value)
 	{
-		this.Value = Value;
+		this.Value = value;
 	}
 
 	/// <summary>
@@ -1233,8 +1233,8 @@ public struct NormalizedRect
 
 public static class DsResults
 {
-	public const int E_BufferNotSet = unchecked((int)0x8004020C);
-	public const int E_NotConnected = unchecked((int)0x80040209);
+	public const int EBufferNotSet = unchecked((int)0x8004020C);
+	public const int ENotConnected = unchecked((int)0x80040209);
 }
 
 public static class DsError
@@ -1250,7 +1250,7 @@ public static class DsError
 	///     is thrown.
 	/// </summary>
 	/// <param name="hr">The HRESULT to check</param>
-	public static void ThrowExceptionForHR(int hr)
+	public static void ThrowExceptionForHr(int hr)
 	{
 		// If a severe error has occurred
 		if (hr < 0)
@@ -1273,13 +1273,13 @@ public static class DsError
 	/// <returns>The string, or null if no error text can be found</returns>
 	public static string GetErrorText(int hr)
 	{
-		const int MAX_ERROR_TEXT_LEN = 160;
+		const int maxErrorTextLen = 160;
 
 		// Make a buffer to hold the string
-		StringBuilder buf = new(MAX_ERROR_TEXT_LEN, MAX_ERROR_TEXT_LEN);
+		StringBuilder buf = new(maxErrorTextLen, maxErrorTextLen);
 
 		// If a string is returned, build a com error from it
-		if (AMGetErrorText(hr, buf, MAX_ERROR_TEXT_LEN) > 0) return buf.ToString();
+		if (AMGetErrorText(hr, buf, maxErrorTextLen) > 0) return buf.ToString();
 		return null;
 	}
 }
@@ -1301,14 +1301,14 @@ public static class DsUtils
 
 		try
 		{
-			var g = PropSetID.Pin;
+			var g = PropSetId.Pin;
 
 			// Get an IKsPropertySet from the pin
 			if (pPin is IKsPropertySet pKs)
 			{
 				// Query for the Category
-				var hr = pKs.Get(g, (int)AMPropertyPin.Category, IntPtr.Zero, 0, ipOut, iSize, out var cbBytes);
-				DsError.ThrowExceptionForHR(hr);
+				var hr = pKs.Get(g, (int)AmPropertyPin.Category, IntPtr.Zero, 0, ipOut, iSize, out var cbBytes);
+				DsError.ThrowExceptionForHr(hr);
 
 				// Marshal it to the return variable
 				guidRet = (Guid)Marshal.PtrToStructure(ipOut, typeof(Guid));
@@ -1327,7 +1327,7 @@ public static class DsUtils
 	///     Free the nested structures and release any
 	///     COM objects within an AMMediaType struct.
 	/// </summary>
-	public static void FreeAMMediaType(AMMediaType mediaType)
+	public static void FreeAmMediaType(AmMediaType mediaType)
 	{
 		if (mediaType != null)
 		{
@@ -1361,12 +1361,12 @@ public static class DsUtils
 
 public class DsDevice : IDisposable
 {
-	private string m_Name;
+	private string _mName;
 
-	public DsDevice(IMoniker Moniker)
+	public DsDevice(IMoniker moniker)
 	{
-		this.Moniker = Moniker;
-		m_Name = null;
+		this.Moniker = moniker;
+		_mName = null;
 	}
 
 	public IMoniker Moniker { get; private set; }
@@ -1375,8 +1375,8 @@ public class DsDevice : IDisposable
 	{
 		get
 		{
-			if (m_Name == null) m_Name = GetPropBagValue("FriendlyName");
-			return m_Name;
+			if (_mName == null) _mName = GetPropBagValue("FriendlyName");
+			return _mName;
 		}
 	}
 
@@ -1388,7 +1388,7 @@ public class DsDevice : IDisposable
 			Moniker = null;
 		}
 
-		m_Name = null;
+		_mName = null;
 		GC.SuppressFinalize(this);
 	}
 
@@ -1396,14 +1396,14 @@ public class DsDevice : IDisposable
 	///     Returns an array of DsDevices of type devcat.
 	/// </summary>
 	/// <param name="cat">Any one of FilterCategory</param>
-	public static DsDevice[] GetDevicesOfCat(Guid FilterCategory)
+	public static DsDevice[] GetDevicesOfCat(Guid filterCategory)
 	{
 		// Use arrayList to build the retun list since it is easily resizable
 		DsDevice[] devret;
 		ArrayList devs = new();
 		var enumDev = (ICreateDevEnum)new CreateDevEnum();
-		var hr = enumDev.CreateClassEnumerator(FilterCategory, out var enumMon, 0);
-		DsError.ThrowExceptionForHR(hr);
+		var hr = enumDev.CreateClassEnumerator(filterCategory, out var enumMon, 0);
+		DsError.ThrowExceptionForHr(hr);
 
 		// CreateClassEnumerator returns null for enumMon if there are no entries
 		if (hr != 1)
@@ -1465,7 +1465,7 @@ public class DsDevice : IDisposable
 			bag = (IPropertyBag)bagObj;
 
 			var hr = bag.Read(sPropName, out var val, null);
-			DsError.ThrowExceptionForHR(hr);
+			DsError.ThrowExceptionForHr(hr);
 
 			ret = val as string;
 		}
@@ -1500,7 +1500,7 @@ public static class DsFindPin
 
 		// Get the pin enumerator
 		var hr = vSource.EnumPins(out var ppEnum);
-		DsError.ThrowExceptionForHR(hr);
+		DsError.ThrowExceptionForHr(hr);
 
 		try
 		{
@@ -1509,7 +1509,7 @@ public static class DsFindPin
 			{
 				// Read the direction
 				hr = pPins[0].QueryDirection(out var ppindir);
-				DsError.ThrowExceptionForHR(hr);
+				DsError.ThrowExceptionForHr(hr);
 
 				// Is it the right direction?
 				if (ppindir == vDir)
@@ -1550,7 +1550,7 @@ public static class DsFindPin
 
 		// Get the pin enumerator
 		var hr = vSource.EnumPins(out var ppEnum);
-		DsError.ThrowExceptionForHR(hr);
+		DsError.ThrowExceptionForHr(hr);
 
 		try
 		{
@@ -1559,7 +1559,7 @@ public static class DsFindPin
 			{
 				// Read the info
 				hr = pPins[0].QueryPinInfo(out var ppinfo);
-				DsError.ThrowExceptionForHR(hr);
+				DsError.ThrowExceptionForHr(hr);
 
 				// Is it the right name?
 				if (ppinfo.name == vPinName)
@@ -1597,7 +1597,7 @@ public static class DsFindPin
 
 		// Get the pin enumerator
 		var hr = vSource.EnumPins(out var ppEnum);
-		DsError.ThrowExceptionForHR(hr);
+		DsError.ThrowExceptionForHr(hr);
 
 		try
 		{
@@ -1608,9 +1608,9 @@ public static class DsFindPin
 				hr = pPins[0].ConnectedTo(out var pOutPin);
 
 				// Check for VFW_E_NOT_CONNECTED.  Anything else is bad.
-				if (hr != DsResults.E_NotConnected)
+				if (hr != DsResults.ENotConnected)
 				{
-					DsError.ThrowExceptionForHR(hr);
+					DsError.ThrowExceptionForHr(hr);
 
 					// The ConnectedTo call succeeded, release the interface
 					Marshal.ReleaseComObject(pOutPin);
@@ -1619,7 +1619,7 @@ public static class DsFindPin
 				// Is it the right status?
 				if (
 					(hr == 0 && vStat == PinConnectedStatus.Connected) ||
-					(hr == DsResults.E_NotConnected && vStat == PinConnectedStatus.Unconnected)
+					(hr == DsResults.ENotConnected && vStat == PinConnectedStatus.Unconnected)
 				)
 				{
 					// Is is the right index?
@@ -1653,16 +1653,16 @@ public static class DsFindPin
 internal abstract class DsMarshaler : ICustomMarshaler
 {
 	// The cookie isn't currently being used.
-	protected string m_cookie;
+	protected string MCookie;
 
 	// The managed object passed in to MarshalManagedToNative, and modified in MarshalNativeToManaged
-	protected object m_obj;
+	protected object MObj;
 
 	// The constructor.  This is called from GetInstance (below)
 	public DsMarshaler(string cookie)
 	{
 		// If we get a cookie, save it.
-		m_cookie = cookie;
+		MCookie = cookie;
 	}
 
 	// Called just before invoking the COM method.  The returned IntPtr is what goes on the stack
@@ -1670,7 +1670,7 @@ internal abstract class DsMarshaler : ICustomMarshaler
 	public virtual IntPtr MarshalManagedToNative(object managedObj)
 	{
 		// Save off the passed-in value.  Safe since we just checked the type.
-		m_obj = managedObj;
+		MObj = managedObj;
 
 		// Create an appropriately sized buffer, blank it, and send it to the marshaler to
 		// make the COM call with.
@@ -1686,7 +1686,7 @@ internal abstract class DsMarshaler : ICustomMarshaler
 	// from MarshalManagedToNative.  The return value is unused.
 	public virtual object MarshalNativeToManaged(IntPtr pNativeData)
 	{
-		return m_obj;
+		return MObj;
 	}
 
 	// Release the (now unused) buffer
@@ -1698,7 +1698,7 @@ internal abstract class DsMarshaler : ICustomMarshaler
 	// Release the (now unused) managed object
 	public virtual void CleanUpManagedData(object managedObj)
 	{
-		m_obj = null;
+		MObj = null;
 	}
 
 	// This routine is (apparently) never called by the marshaler.  However it can be useful.
@@ -1713,9 +1713,9 @@ internal abstract class DsMarshaler : ICustomMarshaler
 
 // c# does not correctly marshal arrays of pointers.
 //
-internal class EMTMarshaler : DsMarshaler
+internal class EmtMarshaler : DsMarshaler
 {
-	public EMTMarshaler(string cookie) : base(cookie)
+	public EmtMarshaler(string cookie) : base(cookie)
 	{
 	}
 
@@ -1723,14 +1723,14 @@ internal class EMTMarshaler : DsMarshaler
 	// from MarshalManagedToNative.  The return value is unused.
 	public override object MarshalNativeToManaged(IntPtr pNativeData)
 	{
-		var emt = m_obj as AMMediaType[];
+		var emt = MObj as AmMediaType[];
 
 		for (var x = 0; x < emt.Length; x++)
 		{
 			// Copy in the value, and advance the pointer
 			var p = Marshal.ReadIntPtr(pNativeData, x * IntPtr.Size);
 			if (p != IntPtr.Zero)
-				emt[x] = (AMMediaType)Marshal.PtrToStructure(p, typeof(AMMediaType));
+				emt[x] = (AmMediaType)Marshal.PtrToStructure(p, typeof(AmMediaType));
 			else
 				emt[x] = null;
 		}
@@ -1743,6 +1743,6 @@ internal class EMTMarshaler : DsMarshaler
 	{
 		// Get the array size
 		// Multiply that times the size of a pointer
-		return ((Array)m_obj).Length * IntPtr.Size;
+		return ((Array)MObj).Length * IntPtr.Size;
 	}
 }

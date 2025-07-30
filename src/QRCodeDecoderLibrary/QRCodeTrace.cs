@@ -48,7 +48,7 @@ namespace QRCodeDecoderLibrary;
 /////////////////////////////////////////////////////////////////////
 public static class QRCodeTrace
 {
-	private static string TraceFileName; // trace file name
+	private static string _traceFileName; // trace file name
 	private static readonly int MaxAllowedFileSize = 1024 * 1024;
 
 	/////////////////////////////////////////////////////////////////////
@@ -57,11 +57,11 @@ public static class QRCodeTrace
 
 	public static void Open
 	(
-		string FileName
+		string fileName
 	)
 	{
 		// save full file name
-		TraceFileName = Path.GetFullPath(FileName);
+		_traceFileName = Path.GetFullPath(fileName);
 		Write("----");
 	}
 
@@ -71,14 +71,14 @@ public static class QRCodeTrace
 
 	public static void Format
 	(
-		string Message,
-		params object[] ArgArray
+		string message,
+		params object[] argArray
 	)
 	{
-		if (ArgArray.Length == 0)
-			Write(Message);
+		if (argArray.Length == 0)
+			Write(message);
 		else
-			Write(string.Format(Message, ArgArray));
+			Write(string.Format(message, argArray));
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -87,23 +87,23 @@ public static class QRCodeTrace
 
 	public static void Write
 	(
-		string Message
+		string message
 	)
 	{
 		// test file length
 		TestSize();
 
 		// open existing or create new trace file
-		StreamWriter TraceFile = new(TraceFileName, true);
+		StreamWriter traceFile = new(_traceFileName, true);
 
 		// write date and time
-		TraceFile.Write("{0:yyyy}/{0:MM}/{0:dd} {0:HH}:{0:mm}:{0:ss} ", DateTime.Now);
+		traceFile.Write("{0:yyyy}/{0:MM}/{0:dd} {0:HH}:{0:mm}:{0:ss} ", DateTime.Now);
 
 		// write message
-		TraceFile.WriteLine(Message);
+		traceFile.WriteLine(message);
 
 		// close the file
-		TraceFile.Close();
+		traceFile.Close();
 
 		// exit
 	}
@@ -115,42 +115,42 @@ public static class QRCodeTrace
 	private static void TestSize()
 	{
 		// get trace file info
-		FileInfo TraceFileInfo = new(TraceFileName);
+		FileInfo traceFileInfo = new(_traceFileName);
 
 		// if file does not exist or file length less than max allowed file size do nothing
-		if (TraceFileInfo.Exists == false || TraceFileInfo.Length <= MaxAllowedFileSize) return;
+		if (traceFileInfo.Exists == false || traceFileInfo.Length <= MaxAllowedFileSize) return;
 
 		// create file info class
-		FileStream TraceFile = new(TraceFileName, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+		FileStream traceFile = new(_traceFileName, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
 
 		// seek to 25% length
-		TraceFile.Seek(TraceFile.Length / 4, SeekOrigin.Begin);
+		traceFile.Seek(traceFile.Length / 4, SeekOrigin.Begin);
 
 		// new file length
-		var NewFileLength = (int)(TraceFile.Length - TraceFile.Position);
+		var newFileLength = (int)(traceFile.Length - traceFile.Position);
 
 		// new file buffer
-		var Buffer = new byte[NewFileLength];
+		var buffer = new byte[newFileLength];
 
 		// read file to the end
-		TraceFile.Read(Buffer, 0, NewFileLength);
+		traceFile.Read(buffer, 0, newFileLength);
 
 		// search for first end of line
-		var StartPtr = 0;
-		while (StartPtr < 1024 && Buffer[StartPtr++] != '\n') ;
-		if (StartPtr == 1024) StartPtr = 0;
+		var startPtr = 0;
+		while (startPtr < 1024 && buffer[startPtr++] != '\n') ;
+		if (startPtr == 1024) startPtr = 0;
 
 		// seek to start of file
-		TraceFile.Seek(0, SeekOrigin.Begin);
+		traceFile.Seek(0, SeekOrigin.Begin);
 
 		// write 75% top part of file over the start of the file
-		TraceFile.Write(Buffer, StartPtr, NewFileLength - StartPtr);
+		traceFile.Write(buffer, startPtr, newFileLength - startPtr);
 
 		// truncate the file
-		TraceFile.SetLength(TraceFile.Position);
+		traceFile.SetLength(traceFile.Position);
 
 		// close the file
-		TraceFile.Close();
+		traceFile.Close();
 
 		// exit
 	}

@@ -38,40 +38,40 @@ public class QRSaveImagePixels
 	/// <summary>
 	///     QRCode dimension
 	/// </summary>
-	private readonly int QRCodeDimension;
+	private readonly int _qrCodeDimension;
 
 	/// <summary>
 	///     QR code matrix (no quiet zone)
 	///     Black module = true, White module = false
 	/// </summary>
-	private readonly bool[,] QRCodeMatrix;
+	private readonly bool[,] _qrCodeMatrix;
 
-	private int _ModuleSize = 2;
-	private int _QuietZone = 8;
+	private int _moduleSize = 2;
+	private int _quietZone = 8;
 
 	/// <summary>
 	///     Convert QR code matrix to boolean image constructor
 	/// </summary>
 	public QRSaveImagePixels
 	(
-		bool[,] QRCodeMatrix
+		bool[,] qrCodeMatrix
 	)
 	{
 		// test argument
-		if (QRCodeMatrix == null)
+		if (qrCodeMatrix == null)
 			throw new ArgumentException("QRSaveImagePixels: QRCodeMatrix is null");
 
 		// test matrix dimensions
-		var Width = QRCodeMatrix.GetLength(0);
-		var Height = QRCodeMatrix.GetLength(1);
-		if (Width != Height)
+		var width = qrCodeMatrix.GetLength(0);
+		var height = qrCodeMatrix.GetLength(1);
+		if (width != height)
 			throw new ArgumentException("QRSaveImagePixels: QRCodeMatrix width is not equals height");
-		if (Width < 21 || Width > 177 || (Width - 21) % 4 != 0)
+		if (width < 21 || width > 177 || (width - 21) % 4 != 0)
 			throw new ArgumentException("QRSaveImagePixels: Invalid QRCodeMatrix dimension");
 
 		// save argument
-		this.QRCodeMatrix = QRCodeMatrix;
-		QRCodeDimension = Width;
+		this._qrCodeMatrix = qrCodeMatrix;
+		_qrCodeDimension = width;
 	}
 
 	/// <summary>
@@ -79,12 +79,12 @@ public class QRSaveImagePixels
 	/// </summary>
 	public int ModuleSize
 	{
-		get => _ModuleSize;
+		get => _moduleSize;
 		set
 		{
 			if (value < 1 || value > 100)
 				throw new ArgumentException("QRSaveImagePixels: Module size error. Default is 2.");
-			_ModuleSize = value;
+			_moduleSize = value;
 		}
 	}
 
@@ -95,12 +95,12 @@ public class QRSaveImagePixels
 	/// </summary>
 	public int QuietZone
 	{
-		get => _QuietZone;
+		get => _quietZone;
 		set
 		{
 			if (value < 0 || value > 400)
 				throw new ArgumentException("QRSaveImagePixels: Quiet zone must be 0 to 400. Default is 8.");
-			_QuietZone = value;
+			_quietZone = value;
 		}
 	}
 
@@ -110,33 +110,33 @@ public class QRSaveImagePixels
 	/// <returns>Black and white image in pixels</returns>
 	public bool[,] ConvertQRCodeMatrixToPixels()
 	{
-		var QRCodeImageDimension = _ModuleSize * QRCodeDimension + 2 * _QuietZone;
+		var qrCodeImageDimension = _moduleSize * _qrCodeDimension + 2 * _quietZone;
 
 		// output matrix size in pixels all matrix elements are white (false)
-		var BWImage = new bool[QRCodeImageDimension, QRCodeImageDimension];
+		var bwImage = new bool[qrCodeImageDimension, qrCodeImageDimension];
 
 		// quiet zone offset
-		var XOffset = _QuietZone;
-		var YOffset = _QuietZone;
+		var xOffset = _quietZone;
+		var yOffset = _quietZone;
 
 		// convert result matrix to output matrix
-		for (var Row = 0; Row < QRCodeDimension; Row++)
+		for (var row = 0; row < _qrCodeDimension; row++)
 		{
-			for (var Col = 0; Col < QRCodeDimension; Col++)
+			for (var col = 0; col < _qrCodeDimension; col++)
 			{
 				// bar is black
-				if (QRCodeMatrix[Row, Col])
-					for (var Y = 0; Y < ModuleSize; Y++)
-					for (var X = 0; X < ModuleSize; X++)
-						BWImage[YOffset + Y, XOffset + X] = true;
+				if (_qrCodeMatrix[row, col])
+					for (var y = 0; y < ModuleSize; y++)
+					for (var x = 0; x < ModuleSize; x++)
+						bwImage[yOffset + y, xOffset + x] = true;
 
-				XOffset += ModuleSize;
+				xOffset += ModuleSize;
 			}
 
-			XOffset = _QuietZone;
-			YOffset += ModuleSize;
+			xOffset = _quietZone;
+			yOffset += ModuleSize;
 		}
 
-		return BWImage;
+		return bwImage;
 	}
 }

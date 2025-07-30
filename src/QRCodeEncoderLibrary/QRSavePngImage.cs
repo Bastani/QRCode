@@ -45,7 +45,7 @@ public class QRSavePngImage
 		{ 0, 0, 0, 0, (byte)'I', (byte)'E', (byte)'N', (byte)'D', 0xae, 0x42, 0x60, 0x82 };
 
 	// CRC32 Table
-	private static readonly uint[] CRC32Table =
+	private static readonly uint[] Crc32Table =
 	{
 		0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419,
 		0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4,
@@ -104,45 +104,45 @@ public class QRSavePngImage
 	/// <summary>
 	///     QRCode dimension
 	/// </summary>
-	private readonly int QRCodeDimension;
+	private readonly int _qrCodeDimension;
 
 	/// <summary>
 	///     QR code matrix (no quiet zone)
 	///     Black module = true, White module = false
 	/// </summary>
-	private readonly bool[,] QRCodeMatrix;
+	private readonly bool[,] _qrCodeMatrix;
 
-	private int _ModuleSize = 2;
-	private int _QuietZone = 8;
+	private int _moduleSize = 2;
+	private int _quietZone = 8;
 
 	/// <summary>
 	///     Gets QR Code image dimension
 	/// </summary>
-	private int QRCodeImageDimension;
+	private int _qrCodeImageDimension;
 
 	/// <summary>
 	///     Save QR Code as PNG image constructor
 	/// </summary>
 	public QRSavePngImage
 	(
-		bool[,] QRCodeMatrix
+		bool[,] qrCodeMatrix
 	)
 	{
 		// test argument
-		if (QRCodeMatrix == null)
+		if (qrCodeMatrix == null)
 			throw new ArgumentException("QRSavePngImage: QRCodeMatrix is null");
 
 		// test matrix dimensions
-		var Width = QRCodeMatrix.GetLength(0);
-		var Height = QRCodeMatrix.GetLength(1);
-		if (Width != Height)
+		var width = qrCodeMatrix.GetLength(0);
+		var height = qrCodeMatrix.GetLength(1);
+		if (width != height)
 			throw new ArgumentException("QRSavePngImage: QRCodeMatrix width is not equals height");
-		if (Width < 21 || Width > 177 || (Width - 21) % 4 != 0)
+		if (width < 21 || width > 177 || (width - 21) % 4 != 0)
 			throw new ArgumentException("QRSavePngImage: Invalid QRCodeMatrix dimension");
 
 		// save argument
-		this.QRCodeMatrix = QRCodeMatrix;
-		QRCodeDimension = Width;
+		this._qrCodeMatrix = qrCodeMatrix;
+		_qrCodeDimension = width;
 	}
 
 	/// <summary>
@@ -150,12 +150,12 @@ public class QRSavePngImage
 	/// </summary>
 	public int ModuleSize
 	{
-		get => _ModuleSize;
+		get => _moduleSize;
 		set
 		{
 			if (value < 1 || value > 100)
 				throw new ArgumentException("Module size error. Default is 2.");
-			_ModuleSize = value;
+			_moduleSize = value;
 		}
 	}
 
@@ -166,58 +166,58 @@ public class QRSavePngImage
 	/// </summary>
 	public int QuietZone
 	{
-		get => _QuietZone;
+		get => _quietZone;
 		set
 		{
 			if (value < 0 || value > 400)
 				throw new ArgumentException("Quiet zone must be 0 to 400. Default is 8.");
-			_QuietZone = value;
+			_quietZone = value;
 		}
 	}
 
 	/// <summary>
 	///     Save QRCode image to PNG file
 	/// </summary>
-	/// <param name="FileName">PNG file name</param>
+	/// <param name="fileName">PNG file name</param>
 	public void SaveQRCodeToPngFile
 	(
-		string FileName
+		string fileName
 	)
 	{
 		// exceptions
-		if (FileName == null)
+		if (fileName == null)
 			throw new ArgumentException("SaveQRCodeToPngFile: FileName is null");
 
-		if (!FileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+		if (!fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
 			throw new ArgumentException("SaveQRCodeToPngFile: FileName extension must be .png");
 
 		// file name to stream
-		using Stream OutputStream = new FileStream(FileName, FileMode.Create, FileAccess.Write, FileShare.None);
+		using Stream outputStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
 
 		// save file
-		SaveQRCodeToPngFile(OutputStream);
+		SaveQRCodeToPngFile(outputStream);
 	}
 
 	/// <summary>
 	///     Save QRCode image to PNG stream
 	/// </summary>
-	/// <param name="OutputStream">PNG output stream</param>
+	/// <param name="outputStream">PNG output stream</param>
 	public void SaveQRCodeToPngFile
 	(
-		Stream OutputStream
+		Stream outputStream
 	)
 	{
 		// convert code to PNG file
-		var PngFile = QRCodeToPngFormat();
+		var pngFile = QRCodeToPngFormat();
 
 		// stream to binary writer
-		BinaryWriter Writer = new(OutputStream);
+		BinaryWriter writer = new(outputStream);
 
 		// write png to file 
-		Writer.Write(PngFile, 0, PngFile.Length);
+		writer.Write(pngFile, 0, pngFile.Length);
 
 		// flush all buffers
-		Writer.Flush();
+		writer.Flush();
 	}
 
 	/// <summary>
@@ -226,38 +226,38 @@ public class QRSavePngImage
 	public byte[] QRCodeToPngFormat()
 	{
 		// image dimension
-		QRCodeImageDimension = 2 * _QuietZone + QRCodeDimension * _ModuleSize;
+		_qrCodeImageDimension = 2 * _quietZone + _qrCodeDimension * _moduleSize;
 
 		// header
-		var Header = BuildPngHeader();
+		var header = BuildPngHeader();
 
 		// barcode data
-		var InputBuf = QRCodeMatrixToPng();
+		var inputBuf = QRCodeMatrixToPng();
 
 		// compress barcode data
-		var OutputBuf = PngImageData(InputBuf);
+		var outputBuf = PngImageData(inputBuf);
 
 		// output buffer
-		var PngFile = new byte[PngFileSignature.Length + Header.Length + OutputBuf.Length + PngIendChunk.Length];
-		var Ptr = 0;
+		var pngFile = new byte[PngFileSignature.Length + header.Length + outputBuf.Length + PngIendChunk.Length];
+		var ptr = 0;
 
 		// write signature
-		Array.Copy(PngFileSignature, 0, PngFile, Ptr, PngFileSignature.Length);
-		Ptr += PngFileSignature.Length;
+		Array.Copy(PngFileSignature, 0, pngFile, ptr, PngFileSignature.Length);
+		ptr += PngFileSignature.Length;
 
 		// write header
-		Array.Copy(Header, 0, PngFile, Ptr, Header.Length);
-		Ptr += Header.Length;
+		Array.Copy(header, 0, pngFile, ptr, header.Length);
+		ptr += header.Length;
 
 		// write image data
-		Array.Copy(OutputBuf, 0, PngFile, Ptr, OutputBuf.Length);
-		Ptr += OutputBuf.Length;
+		Array.Copy(outputBuf, 0, pngFile, ptr, outputBuf.Length);
+		ptr += outputBuf.Length;
 
 		// write end of file
-		Array.Copy(PngIendChunk, 0, PngFile, Ptr, PngIendChunk.Length);
+		Array.Copy(PngIendChunk, 0, pngFile, ptr, PngIendChunk.Length);
 
 		// exit with png file in byte array
-		return PngFile;
+		return pngFile;
 	}
 
 	/// <summary>
@@ -267,56 +267,56 @@ public class QRSavePngImage
 	private byte[] BuildPngHeader()
 	{
 		// header
-		var Header = new byte[25];
+		var header = new byte[25];
 
 		// header length
-		Header[0] = 0;
-		Header[1] = 0;
-		Header[2] = 0;
-		Header[3] = 13;
+		header[0] = 0;
+		header[1] = 0;
+		header[2] = 0;
+		header[3] = 13;
 
 		// header label
-		Header[4] = (byte)'I';
-		Header[5] = (byte)'H';
-		Header[6] = (byte)'D';
-		Header[7] = (byte)'R';
+		header[4] = (byte)'I';
+		header[5] = (byte)'H';
+		header[6] = (byte)'D';
+		header[7] = (byte)'R';
 
 		// image width
-		Header[8] = (byte)(QRCodeImageDimension >> 24);
-		Header[9] = (byte)(QRCodeImageDimension >> 16);
-		Header[10] = (byte)(QRCodeImageDimension >> 8);
-		Header[11] = (byte)QRCodeImageDimension;
+		header[8] = (byte)(_qrCodeImageDimension >> 24);
+		header[9] = (byte)(_qrCodeImageDimension >> 16);
+		header[10] = (byte)(_qrCodeImageDimension >> 8);
+		header[11] = (byte)_qrCodeImageDimension;
 
 		// image height
-		Header[12] = Header[8];
-		Header[13] = Header[9];
-		Header[14] = Header[10];
-		Header[15] = Header[11];
+		header[12] = header[8];
+		header[13] = header[9];
+		header[14] = header[10];
+		header[15] = header[11];
 
 		// bit depth (1)
-		Header[16] = 1;
+		header[16] = 1;
 
 		// color type (grey)
-		Header[17] = 0;
+		header[17] = 0;
 
 		// Compression (deflate)
-		Header[18] = 0;
+		header[18] = 0;
 
 		// filtering (up)
-		Header[19] = 0; // 2;
+		header[19] = 0; // 2;
 
 		// interlace (none)
-		Header[20] = 0;
+		header[20] = 0;
 
 		// crc
-		var Crc = CRC32Checksum(Header, 4, 17);
-		Header[21] = (byte)(Crc >> 24);
-		Header[22] = (byte)(Crc >> 16);
-		Header[23] = (byte)(Crc >> 8);
-		Header[24] = (byte)Crc;
+		var crc = Crc32Checksum(header, 4, 17);
+		header[21] = (byte)(crc >> 24);
+		header[22] = (byte)(crc >> 16);
+		header[23] = (byte)(crc >> 8);
+		header[24] = (byte)crc;
 
 		// return header
-		return Header;
+		return header;
 	}
 
 	/// <summary>
@@ -326,67 +326,67 @@ public class QRSavePngImage
 	private byte[] QRCodeMatrixToPng()
 	{
 		// image width and height
-		var ImageDimension = QRCodeImageDimension;
+		var imageDimension = _qrCodeImageDimension;
 
 		// width in bytes including filter leading byte
-		var PngWidth = (ImageDimension + 7) / 8 + 1;
+		var pngWidth = (imageDimension + 7) / 8 + 1;
 
 		// PNG image array
 		// array is all zeros in other words it is black image
-		var PngLength = PngWidth * ImageDimension;
-		var PngImage = new byte[PngLength];
+		var pngLength = pngWidth * imageDimension;
+		var pngImage = new byte[pngLength];
 
 		// first row is a quiet zone and it is all white (filter is 0 none)
-		int PngPtr;
-		for (PngPtr = 1; PngPtr < PngWidth; PngPtr++) PngImage[PngPtr] = 255;
+		int pngPtr;
+		for (pngPtr = 1; pngPtr < pngWidth; pngPtr++) pngImage[pngPtr] = 255;
 
 		// additional quiet zone rows are the same as first line (filter is 2 up)
-		var PngEnd = QuietZone * PngWidth;
-		for (; PngPtr < PngEnd; PngPtr += PngWidth) PngImage[PngPtr] = 2;
+		var pngEnd = QuietZone * pngWidth;
+		for (; pngPtr < pngEnd; pngPtr += pngWidth) pngImage[pngPtr] = 2;
 
 		// convert result matrix to output matrix
-		for (var MatrixRow = 0; MatrixRow < QRCodeDimension; MatrixRow++)
+		for (var matrixRow = 0; matrixRow < _qrCodeDimension; matrixRow++)
 		{
 			// make next row all white (filter is 0 none)
-			PngEnd = PngPtr + PngWidth;
-			for (var PngCol = PngPtr + 1; PngCol < PngEnd; PngCol++) PngImage[PngCol] = 255;
+			pngEnd = pngPtr + pngWidth;
+			for (var pngCol = pngPtr + 1; pngCol < pngEnd; pngCol++) pngImage[pngCol] = 255;
 
 			// add black to next row
-			for (var MatrixCol = 0; MatrixCol < QRCodeDimension; MatrixCol++)
+			for (var matrixCol = 0; matrixCol < _qrCodeDimension; matrixCol++)
 			{
 				// bar is white
-				if (!QRCodeMatrix[MatrixRow, MatrixCol]) continue;
+				if (!_qrCodeMatrix[matrixRow, matrixCol]) continue;
 
-				var PixelCol = ModuleSize * MatrixCol + QuietZone;
-				var PixelEnd = PixelCol + ModuleSize;
-				for (; PixelCol < PixelEnd; PixelCol++)
-					PngImage[PngPtr + 1 + PixelCol / 8] &= (byte)~(1 << (7 - (PixelCol & 7)));
+				var pixelCol = ModuleSize * matrixCol + QuietZone;
+				var pixelEnd = pixelCol + ModuleSize;
+				for (; pixelCol < pixelEnd; pixelCol++)
+					pngImage[pngPtr + 1 + pixelCol / 8] &= (byte)~(1 << (7 - (pixelCol & 7)));
 			}
 
 			// additional rows are the same as the one above (filter is 2 up)
-			PngEnd = PngPtr + ModuleSize * PngWidth;
-			for (PngPtr += PngWidth; PngPtr < PngEnd; PngPtr += PngWidth) PngImage[PngPtr] = 2;
+			pngEnd = pngPtr + ModuleSize * pngWidth;
+			for (pngPtr += pngWidth; pngPtr < pngEnd; pngPtr += pngWidth) pngImage[pngPtr] = 2;
 		}
 
 		// bottom quiet zone and it is all white (filter is 0 none)
-		PngEnd = PngPtr + PngWidth;
-		for (PngPtr++; PngPtr < PngEnd; PngPtr++) PngImage[PngPtr] = 255;
+		pngEnd = pngPtr + pngWidth;
+		for (pngPtr++; pngPtr < pngEnd; pngPtr++) pngImage[pngPtr] = 255;
 
 		// additional quiet zone rows are the same as first line (filter is 2 up)
-		for (; PngPtr < PngLength; PngPtr += PngWidth) PngImage[PngPtr] = 2;
+		for (; pngPtr < pngLength; pngPtr += pngWidth) pngImage[pngPtr] = 2;
 
 		// exit with Png image in byte array
-		return PngImage;
+		return pngImage;
 	}
 
 	/// <summary>
 	///     Compress PNG image data
 	/// </summary>
-	/// <param name="InputBuf">PNG data</param>
+	/// <param name="inputBuf">PNG data</param>
 	/// <returns>Compressed PNG data as byte array</returns>
 	private static byte[] PngImageData
 	(
-		byte[] InputBuf
+		byte[] inputBuf
 	)
 	{
 		// output buffer is:
@@ -400,85 +400,85 @@ public class QRSavePngImage
 		// Total output buffer length is 18 + DataLen
 
 		// compress image
-		var OutputBuf = ZLibCompress(InputBuf);
+		var outputBuf = ZLibCompress(inputBuf);
 
 		// png chunk data length
-		var PngDataLen = OutputBuf.Length - 12;
-		OutputBuf[0] = (byte)(PngDataLen >> 24);
-		OutputBuf[1] = (byte)(PngDataLen >> 16);
-		OutputBuf[2] = (byte)(PngDataLen >> 8);
-		OutputBuf[3] = (byte)PngDataLen;
+		var pngDataLen = outputBuf.Length - 12;
+		outputBuf[0] = (byte)(pngDataLen >> 24);
+		outputBuf[1] = (byte)(pngDataLen >> 16);
+		outputBuf[2] = (byte)(pngDataLen >> 8);
+		outputBuf[3] = (byte)pngDataLen;
 
 		// add IDAT
-		OutputBuf[4] = (byte)'I';
-		OutputBuf[5] = (byte)'D';
-		OutputBuf[6] = (byte)'A';
-		OutputBuf[7] = (byte)'T';
+		outputBuf[4] = (byte)'I';
+		outputBuf[5] = (byte)'D';
+		outputBuf[6] = (byte)'A';
+		outputBuf[7] = (byte)'T';
 
 		// adler32 checksum
-		var ReadAdler32 = Adler32Checksum(InputBuf, 0, InputBuf.Length);
+		var readAdler32 = Adler32Checksum(inputBuf, 0, inputBuf.Length);
 
 		// ZLib checksum is Adler32 write it big endian order, high byte first
-		var AdlerPtr = OutputBuf.Length - 8;
-		OutputBuf[AdlerPtr++] = (byte)(ReadAdler32 >> 24);
-		OutputBuf[AdlerPtr++] = (byte)(ReadAdler32 >> 16);
-		OutputBuf[AdlerPtr++] = (byte)(ReadAdler32 >> 8);
-		OutputBuf[AdlerPtr] = (byte)ReadAdler32;
+		var adlerPtr = outputBuf.Length - 8;
+		outputBuf[adlerPtr++] = (byte)(readAdler32 >> 24);
+		outputBuf[adlerPtr++] = (byte)(readAdler32 >> 16);
+		outputBuf[adlerPtr++] = (byte)(readAdler32 >> 8);
+		outputBuf[adlerPtr] = (byte)readAdler32;
 
 		// crc
-		var Crc = CRC32Checksum(OutputBuf, 4, OutputBuf.Length - 8);
-		var CrcPtr = OutputBuf.Length - 4;
-		OutputBuf[CrcPtr++] = (byte)(Crc >> 24);
-		OutputBuf[CrcPtr++] = (byte)(Crc >> 16);
-		OutputBuf[CrcPtr++] = (byte)(Crc >> 8);
-		OutputBuf[CrcPtr++] = (byte)Crc;
+		var crc = Crc32Checksum(outputBuf, 4, outputBuf.Length - 8);
+		var crcPtr = outputBuf.Length - 4;
+		outputBuf[crcPtr++] = (byte)(crc >> 24);
+		outputBuf[crcPtr++] = (byte)(crc >> 16);
+		outputBuf[crcPtr++] = (byte)(crc >> 8);
+		outputBuf[crcPtr++] = (byte)crc;
 
 		// successful exit
-		return OutputBuf;
+		return outputBuf;
 	}
 
 	/// <summary>
 	///     Accumulate CRC 32
 	/// </summary>
-	/// <param name="Buffer">Byte array buffer</param>
-	/// <param name="Pos">Buffer position</param>
-	/// <param name="Len">Buffer length</param>
+	/// <param name="buffer">Byte array buffer</param>
+	/// <param name="pos">Buffer position</param>
+	/// <param name="len">Buffer length</param>
 	/// <returns>CRC32</returns>
-	internal static uint CRC32Checksum
+	internal static uint Crc32Checksum
 	(
-		byte[] Buffer,
-		int Pos,
-		int Len
+		byte[] buffer,
+		int pos,
+		int len
 	)
 	{
-		var CRC = 0xffffffff;
-		for (; Len > 0; Len--)
-			CRC = CRC32Table[(CRC ^ Buffer[Pos++]) & 0xff] ^ (CRC >> 8);
-		return ~CRC;
+		var crc = 0xffffffff;
+		for (; len > 0; len--)
+			crc = Crc32Table[(crc ^ buffer[pos++]) & 0xff] ^ (crc >> 8);
+		return ~crc;
 	}
 
 	/// <summary>
 	///     Accumulate Adler Checksum
 	/// </summary>
-	/// <param name="Buffer">Byte array buffer</param>
-	/// <param name="Pos">Buffer position</param>
-	/// <param name="Len">Buffer length</param>
+	/// <param name="buffer">Byte array buffer</param>
+	/// <param name="pos">Buffer position</param>
+	/// <param name="len">Buffer length</param>
 	/// <returns>Adler32 checksum</returns>
 	internal static uint Adler32Checksum
 	(
-		byte[] Buffer,
-		int Pos,
-		int Len
+		byte[] buffer,
+		int pos,
+		int len
 	)
 	{
-		const uint Adler32Base = 65521;
+		const uint adler32Base = 65521;
 
 		// split current Adler chksum into two 
-		uint AdlerLow = 1; // AdlerValue & 0xFFFF;
-		uint AdlerHigh = 0; // AdlerValue >> 16;
+		uint adlerLow = 1; // AdlerValue & 0xFFFF;
+		uint adlerHigh = 0; // AdlerValue >> 16;
 
 		// loop for segments of 5552 bytes or less
-		while (Len > 0)
+		while (len > 0)
 		{
 			// We can defer the modulo operation:
 			// Under worst case the starting value of the two halves is 65520 = (AdlerBase - 1)
@@ -488,46 +488,46 @@ public class QRSavePngImage
 			// The maximum n before overflow of 32 bit unsigned integer is 5552
 			// it is the solution of the following quadratic equation
 			// 255 * n * n + (2 * (AdlerBase - 1) + 255) * n + 2 * (AdlerBase - 1 - uint.MaxValue) = 0
-			var n = Len < 5552 ? Len : 5552;
-			Len -= n;
+			var n = len < 5552 ? len : 5552;
+			len -= n;
 			while (--n >= 0)
 			{
-				AdlerLow += Buffer[Pos++];
-				AdlerHigh += AdlerLow;
+				adlerLow += buffer[pos++];
+				adlerHigh += adlerLow;
 			}
 
-			AdlerLow %= Adler32Base;
-			AdlerHigh %= Adler32Base;
+			adlerLow %= adler32Base;
+			adlerHigh %= adler32Base;
 		}
 
-		return (AdlerHigh << 16) | AdlerLow;
+		return (adlerHigh << 16) | adlerLow;
 	}
 
 	internal static byte[] ZLibCompress
 	(
-		byte[] InputBuf
+		byte[] inputBuf
 	)
 	{
 		// input length
-		var InputLen = InputBuf.Length;
+		var inputLen = inputBuf.Length;
 
 		// create output memory stream to receive the compressed buffer
-		MemoryStream OutputStream = new();
+		MemoryStream outputStream = new();
 
 		// deflate compression object
-		DeflateStream Deflate = new(OutputStream, CompressionMode.Compress, true);
+		DeflateStream deflate = new(outputStream, CompressionMode.Compress, true);
 
 		// load input buffer into the compression class
-		Deflate.Write(InputBuf, 0, InputLen);
+		deflate.Write(inputBuf, 0, inputLen);
 
 		// compress, flush and close
-		Deflate.Close();
+		deflate.Close();
 
 		// compressed file length
-		var OutputLen = (int)OutputStream.Length;
+		var outputLen = (int)outputStream.Length;
 
 		// create empty output buffer
-		var OutputBuf = new byte[OutputLen + 18];
+		var outputBuf = new byte[outputLen + 18];
 
 		// Header is made out of 16 bits [iiiicccclldxxxxx]
 		// iiii is compression information. It is WindowBit - 8 in this case 7. iiii = 0111
@@ -537,15 +537,15 @@ public class QRSavePngImage
 		// d is preset dictionary. The preset dictionary is not supported by this program. d is always 0
 		// xxx is 5 bit check sum (31 - header % 31)
 		// write two bytes in most significant byte first
-		OutputBuf[8] = 0x78;
-		OutputBuf[9] = 0x9c;
+		outputBuf[8] = 0x78;
+		outputBuf[9] = 0x9c;
 
 		// copy the compressed result
-		OutputStream.Seek(0, SeekOrigin.Begin);
-		OutputStream.Read(OutputBuf, 10, OutputLen);
-		OutputStream.Close();
+		outputStream.Seek(0, SeekOrigin.Begin);
+		outputStream.Read(outputBuf, 10, outputLen);
+		outputStream.Close();
 
 		// successful exit
-		return OutputBuf;
+		return outputBuf;
 	}
 }

@@ -44,46 +44,46 @@ public class QRSaveBitmapImage
 	/// <summary>
 	///     QRCode dimension
 	/// </summary>
-	private readonly int QRCodeDimension;
+	private readonly int _qrCodeDimension;
 
 	/// <summary>
 	///     QR code matrix (no quiet zone)
 	///     Black module = true, White module = false
 	/// </summary>
-	private readonly bool[,] QRCodeMatrix;
+	private readonly bool[,] _qrCodeMatrix;
 
-	private int _ModuleSize = 2;
-	private int _QuietZone = 8;
+	private int _moduleSize = 2;
+	private int _quietZone = 8;
 
 	/// <summary>
 	///     Gets QR Code image dimension
 	/// </summary>
-	private int QRCodeImageDimension;
+	private int _qrCodeImageDimension;
 
 	/// <summary>
 	///     Save QR Code Bitmap image constructor
 	/// </summary>
-	/// <param name="QRCodeMatrix">QR code matrix</param>
+	/// <param name="qrCodeMatrix">QR code matrix</param>
 	public QRSaveBitmapImage
 	(
-		bool[,] QRCodeMatrix
+		bool[,] qrCodeMatrix
 	)
 	{
 		// test argument
-		if (QRCodeMatrix == null)
+		if (qrCodeMatrix == null)
 			throw new ArgumentException("QRSaveBitmapImage: QRCodeMatrix is null");
 
 		// test matrix dimensions
-		var Width = QRCodeMatrix.GetLength(0);
-		var Height = QRCodeMatrix.GetLength(1);
-		if (Width != Height)
+		var width = qrCodeMatrix.GetLength(0);
+		var height = qrCodeMatrix.GetLength(1);
+		if (width != height)
 			throw new ArgumentException("QRSaveBitmapImage: QRCodeMatrix width and height are not equal");
-		if (Width < 21 || Width > 177 || (Width - 21) % 4 != 0)
+		if (width < 21 || width > 177 || (width - 21) % 4 != 0)
 			throw new ArgumentException("QRSaveBitmapImage: Invalid QRCodeMatrix dimension");
 
 		// save argument
-		this.QRCodeMatrix = QRCodeMatrix;
-		QRCodeDimension = Width;
+		this._qrCodeMatrix = qrCodeMatrix;
+		_qrCodeDimension = width;
 	}
 
 	/// <summary>
@@ -91,12 +91,12 @@ public class QRSaveBitmapImage
 	/// </summary>
 	public int ModuleSize
 	{
-		get => _ModuleSize;
+		get => _moduleSize;
 		set
 		{
 			if (value < 1 || value > 100)
 				throw new ArgumentException("Module size error. Default is 2.");
-			_ModuleSize = value;
+			_moduleSize = value;
 		}
 	}
 
@@ -107,12 +107,12 @@ public class QRSaveBitmapImage
 	/// </summary>
 	public int QuietZone
 	{
-		get => _QuietZone;
+		get => _quietZone;
 		set
 		{
 			if (value < 0 || value > 400)
 				throw new ArgumentException("Quiet zone must be 0 to 400. Default is 8.");
-			_QuietZone = value;
+			_quietZone = value;
 		}
 	}
 
@@ -133,55 +133,55 @@ public class QRSaveBitmapImage
 	public Bitmap CreateQRCodeBitmap()
 	{
 		// image dimension
-		QRCodeImageDimension = ModuleSize * QRCodeDimension + 2 * QuietZone;
+		_qrCodeImageDimension = ModuleSize * _qrCodeDimension + 2 * QuietZone;
 
 		// create picture object and make it white
-		Bitmap Image = new(QRCodeImageDimension, QRCodeImageDimension);
-		var graphics = Graphics.FromImage(Image);
-		graphics.FillRectangle(WhiteBrush, 0, 0, QRCodeImageDimension, QRCodeImageDimension);
+		Bitmap image = new(_qrCodeImageDimension, _qrCodeImageDimension);
+		var graphics = Graphics.FromImage(image);
+		graphics.FillRectangle(WhiteBrush, 0, 0, _qrCodeImageDimension, _qrCodeImageDimension);
 
 		// x and y image pointers
-		var XOffset = QuietZone;
-		var YOffset = QuietZone;
+		var xOffset = QuietZone;
+		var yOffset = QuietZone;
 
 		// convert result matrix to output matrix
-		for (var Row = 0; Row < QRCodeDimension; Row++)
+		for (var row = 0; row < _qrCodeDimension; row++)
 		{
-			for (var Col = 0; Col < QRCodeDimension; Col++)
+			for (var col = 0; col < _qrCodeDimension; col++)
 			{
 				// bar is black
-				if (QRCodeMatrix[Row, Col])
-					graphics.FillRectangle(BlackBrush, XOffset, YOffset, ModuleSize, ModuleSize);
-				XOffset += ModuleSize;
+				if (_qrCodeMatrix[row, col])
+					graphics.FillRectangle(BlackBrush, xOffset, yOffset, ModuleSize, ModuleSize);
+				xOffset += ModuleSize;
 			}
 
-			XOffset = QuietZone;
-			YOffset += ModuleSize;
+			xOffset = QuietZone;
+			yOffset += ModuleSize;
 		}
 
 		// return image
-		return Image;
+		return image;
 	}
 
 	/// <summary>
 	///     Save QRCode image to image file
 	/// </summary>
-	/// <param name="FileName">Image file name</param>
+	/// <param name="fileName">Image file name</param>
 	public void SaveQRCodeToImageFile
 	(
-		string FileName,
-		ImageFormat Format
+		string fileName,
+		ImageFormat format
 	)
 	{
 		// exceptions
-		if (FileName == null)
+		if (fileName == null)
 			throw new ArgumentException("SaveQRCodeToPngFile: FileName is null");
 
 		// create Bitmap
-		var ImageBitmap = CreateQRCodeBitmap();
+		var imageBitmap = CreateQRCodeBitmap();
 
 		// save bitmap
-		ImageBitmap.Save(FileName, Format);
+		imageBitmap.Save(fileName, format);
 	}
 
 	/// <summary>
@@ -190,21 +190,21 @@ public class QRSaveBitmapImage
 	/// <param name="FileName">Image file name</param>
 	public void SaveQRCodeToImageFile
 	(
-		Stream OutputStream,
-		ImageFormat Format
+		Stream outputStream,
+		ImageFormat format
 	)
 	{
 		// exceptions
-		if (OutputStream == null)
+		if (outputStream == null)
 			throw new ArgumentException("SaveQRCodeToImageFile: Output stream is null");
 
 		// create Bitmap
-		var ImageBitmap = CreateQRCodeBitmap();
+		var imageBitmap = CreateQRCodeBitmap();
 
 		// write to stream 
-		ImageBitmap.Save(OutputStream, Format);
+		imageBitmap.Save(outputStream, format);
 
 		// flush all buffers
-		OutputStream.Flush();
+		outputStream.Flush();
 	}
 }

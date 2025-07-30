@@ -69,16 +69,16 @@ internal class QRCodeFinder
 	/// </summary>
 	internal QRCodeFinder
 	(
-		int Row,
-		int Col1,
-		int Col2,
-		double HModule
+		int row,
+		int col1,
+		int col2,
+		double hModule
 	)
 	{
-		this.Row = Row;
-		this.Col1 = Col1;
-		this.Col2 = Col2;
-		this.HModule = HModule;
+		this.Row = row;
+		this.Col1 = col1;
+		this.Col2 = col2;
+		this.HModule = hModule;
 		Distance = double.MaxValue;
 	}
 
@@ -87,35 +87,35 @@ internal class QRCodeFinder
 	/// </summary>
 	internal void Match
 	(
-		int Col,
-		int Row1,
-		int Row2,
-		double VModule
+		int col,
+		int row1,
+		int row2,
+		double vModule
 	)
 	{
 		// test if horizontal and vertical are not related
-		if (Col < Col1 || Col >= Col2 || Row < Row1 || Row >= Row2) return;
+		if (col < Col1 || col >= Col2 || Row < row1 || Row >= row2) return;
 
 		// Module sizes must be about the same
-		if (Math.Min(HModule, VModule) < Math.Max(HModule, VModule) * QRDecoder.MODULE_SIZE_DEVIATION) return;
+		if (Math.Min(HModule, vModule) < Math.Max(HModule, vModule) * QRDecoder.ModuleSizeDeviation) return;
 
 		// calculate distance
-		var DeltaX = Col - 0.5 * (Col1 + Col2);
-		var DeltaY = Row - 0.5 * (Row1 + Row2);
-		var Delta = Math.Sqrt(DeltaX * DeltaX + DeltaY * DeltaY);
+		var deltaX = col - 0.5 * (Col1 + Col2);
+		var deltaY = Row - 0.5 * (row1 + row2);
+		var delta = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
 
 		// distance between two points must be less than 2 pixels
-		if (Delta > QRDecoder.HOR_VERT_SCAN_MAX_DISTANCE) return;
+		if (delta > QRDecoder.HorVertScanMaxDistance) return;
 
 		// new result is better than last result
-		if (Delta < Distance)
+		if (delta < Distance)
 		{
-			this.Col = Col;
-			this.Row1 = Row1;
-			this.Row2 = Row2;
-			this.VModule = VModule;
-			ModuleSize = 0.5 * (HModule + VModule);
-			Distance = Delta;
+			this.Col = col;
+			this.Row1 = row1;
+			this.Row2 = row2;
+			this.VModule = vModule;
+			ModuleSize = 0.5 * (HModule + vModule);
+			Distance = delta;
 		}
 	}
 
@@ -124,10 +124,10 @@ internal class QRCodeFinder
 	/// </summary>
 	internal bool Overlap
 	(
-		QRCodeFinder Other
+		QRCodeFinder other
 	)
 	{
-		return Other.Col1 < Col2 && Other.Col2 >= Col1 && Other.Row1 < Row2 && Other.Row2 >= Row1;
+		return other.Col1 < Col2 && other.Col2 >= Col1 && other.Row1 < Row2 && other.Row2 >= Row1;
 	}
 
 	/// <summary>

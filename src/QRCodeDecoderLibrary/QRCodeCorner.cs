@@ -65,26 +65,26 @@ internal class QRCodeCorner
 
 	private QRCodeCorner
 	(
-		QRCodeFinder TopLeftFinder,
-		QRCodeFinder TopRightFinder,
-		QRCodeFinder BottomLeftFinder
+		QRCodeFinder topLeftFinder,
+		QRCodeFinder topRightFinder,
+		QRCodeFinder bottomLeftFinder
 	)
 	{
 		// save three finders
-		this.TopLeftFinder = TopLeftFinder;
-		this.TopRightFinder = TopRightFinder;
-		this.BottomLeftFinder = BottomLeftFinder;
+		this.TopLeftFinder = topLeftFinder;
+		this.TopRightFinder = topRightFinder;
+		this.BottomLeftFinder = bottomLeftFinder;
 
 		// top line slope
-		TopLineDeltaX = TopRightFinder.Col - TopLeftFinder.Col;
-		TopLineDeltaY = TopRightFinder.Row - TopLeftFinder.Row;
+		TopLineDeltaX = topRightFinder.Col - topLeftFinder.Col;
+		TopLineDeltaY = topRightFinder.Row - topLeftFinder.Row;
 
 		// top line length
 		TopLineLength = Math.Sqrt(TopLineDeltaX * TopLineDeltaX + TopLineDeltaY * TopLineDeltaY);
 
 		// left line slope
-		LeftLineDeltaX = BottomLeftFinder.Col - TopLeftFinder.Col;
-		LeftLineDeltaY = BottomLeftFinder.Row - TopLeftFinder.Row;
+		LeftLineDeltaX = bottomLeftFinder.Col - topLeftFinder.Col;
+		LeftLineDeltaY = bottomLeftFinder.Row - topLeftFinder.Row;
 
 		// left line length
 		LeftLineLength = Math.Sqrt(LeftLineDeltaX * LeftLineDeltaX + LeftLineDeltaY * LeftLineDeltaY);
@@ -96,66 +96,66 @@ internal class QRCodeCorner
 
 	internal static QRCodeCorner CreateCorner
 	(
-		QRCodeFinder TopLeftFinder,
-		QRCodeFinder TopRightFinder,
-		QRCodeFinder BottomLeftFinder
+		QRCodeFinder topLeftFinder,
+		QRCodeFinder topRightFinder,
+		QRCodeFinder bottomLeftFinder
 	)
 	{
 		// try all three possible permutation of three finders
-		for (var Index = 0; Index < 3; Index++)
+		for (var index = 0; index < 3; index++)
 		{
 			// TestCorner runs three times to test all posibilities
 			// rotate top left, top right and bottom left
-			if (Index != 0)
+			if (index != 0)
 			{
-				var Temp = TopLeftFinder;
-				TopLeftFinder = TopRightFinder;
-				TopRightFinder = BottomLeftFinder;
-				BottomLeftFinder = Temp;
+				var temp = topLeftFinder;
+				topLeftFinder = topRightFinder;
+				topRightFinder = bottomLeftFinder;
+				bottomLeftFinder = temp;
 			}
 
 			// top line slope
-			double TopLineDeltaX = TopRightFinder.Col - TopLeftFinder.Col;
-			double TopLineDeltaY = TopRightFinder.Row - TopLeftFinder.Row;
+			double topLineDeltaX = topRightFinder.Col - topLeftFinder.Col;
+			double topLineDeltaY = topRightFinder.Row - topLeftFinder.Row;
 
 			// left line slope
-			double LeftLineDeltaX = BottomLeftFinder.Col - TopLeftFinder.Col;
-			double LeftLineDeltaY = BottomLeftFinder.Row - TopLeftFinder.Row;
+			double leftLineDeltaX = bottomLeftFinder.Col - topLeftFinder.Col;
+			double leftLineDeltaY = bottomLeftFinder.Row - topLeftFinder.Row;
 
 			// top line length
-			var TopLineLength = Math.Sqrt(TopLineDeltaX * TopLineDeltaX + TopLineDeltaY * TopLineDeltaY);
+			var topLineLength = Math.Sqrt(topLineDeltaX * topLineDeltaX + topLineDeltaY * topLineDeltaY);
 
 			// left line length
-			var LeftLineLength = Math.Sqrt(LeftLineDeltaX * LeftLineDeltaX + LeftLineDeltaY * LeftLineDeltaY);
+			var leftLineLength = Math.Sqrt(leftLineDeltaX * leftLineDeltaX + leftLineDeltaY * leftLineDeltaY);
 
 			// the short side must be at least 80% of the long side
-			if (Math.Min(TopLineLength, LeftLineLength) <
-			    QRDecoder.CORNER_SIDE_LENGTH_DEV * Math.Max(TopLineLength, LeftLineLength))
+			if (Math.Min(topLineLength, leftLineLength) <
+			    QRDecoder.CornerSideLengthDev * Math.Max(topLineLength, leftLineLength))
 				continue;
 
 			// top line vector
-			var TopLineSin = TopLineDeltaY / TopLineLength;
-			var TopLineCos = TopLineDeltaX / TopLineLength;
+			var topLineSin = topLineDeltaY / topLineLength;
+			var topLineCos = topLineDeltaX / topLineLength;
 
 			// rotate lines such that top line is parallel to x axis
 			// left line after rotation
-			var NewLeftX = TopLineCos * LeftLineDeltaX + TopLineSin * LeftLineDeltaY;
-			var NewLeftY = -TopLineSin * LeftLineDeltaX + TopLineCos * LeftLineDeltaY;
+			var newLeftX = topLineCos * leftLineDeltaX + topLineSin * leftLineDeltaY;
+			var newLeftY = -topLineSin * leftLineDeltaX + topLineCos * leftLineDeltaY;
 
 			// new left line X should be zero (or between +/- 4 deg)
-			if (Math.Abs(NewLeftX / LeftLineLength) > QRDecoder.CORNER_RIGHT_ANGLE_DEV)
+			if (Math.Abs(newLeftX / leftLineLength) > QRDecoder.CornerRightAngleDev)
 				continue;
 
 			// swap top line with left line
-			if (NewLeftY < 0)
+			if (newLeftY < 0)
 			{
 				// swap top left with bottom right
-				var TempFinder = TopRightFinder;
-				TopRightFinder = BottomLeftFinder;
-				BottomLeftFinder = TempFinder;
+				var tempFinder = topRightFinder;
+				topRightFinder = bottomLeftFinder;
+				bottomLeftFinder = tempFinder;
 			}
 
-			return new QRCodeCorner(TopLeftFinder, TopRightFinder, BottomLeftFinder);
+			return new QRCodeCorner(topLeftFinder, topRightFinder, bottomLeftFinder);
 		}
 
 		return null;
@@ -168,39 +168,39 @@ internal class QRCodeCorner
 	internal int InitialVersionNumber()
 	{
 		// version number based on top line
-		double TopModules = 7;
+		double topModules = 7;
 
 		// top line is mostly horizontal
 		if (Math.Abs(TopLineDeltaX) >= Math.Abs(TopLineDeltaY))
-			TopModules += TopLineLength * TopLineLength /
+			topModules += TopLineLength * TopLineLength /
 			              (Math.Abs(TopLineDeltaX) * 0.5 * (TopLeftFinder.HModule + TopRightFinder.HModule));
 
 		// top line is mostly vertical
 		else
-			TopModules += TopLineLength * TopLineLength /
+			topModules += TopLineLength * TopLineLength /
 			              (Math.Abs(TopLineDeltaY) * 0.5 * (TopLeftFinder.VModule + TopRightFinder.VModule));
 
 		// version number based on left line
-		double LeftModules = 7;
+		double leftModules = 7;
 
 		// Left line is mostly vertical
 		if (Math.Abs(LeftLineDeltaY) >= Math.Abs(LeftLineDeltaX))
-			LeftModules += LeftLineLength * LeftLineLength /
+			leftModules += LeftLineLength * LeftLineLength /
 			               (Math.Abs(LeftLineDeltaY) * 0.5 * (TopLeftFinder.VModule + BottomLeftFinder.VModule));
 
 		// left line is mostly horizontal
 		else
-			LeftModules += LeftLineLength * LeftLineLength /
+			leftModules += LeftLineLength * LeftLineLength /
 			               (Math.Abs(LeftLineDeltaX) * 0.5 * (TopLeftFinder.HModule + BottomLeftFinder.HModule));
 
 		// version (there is rounding in the calculation)
-		var Version = ((int)Math.Round(0.5 * (TopModules + LeftModules)) - 15) / 4;
+		var version = ((int)Math.Round(0.5 * (topModules + leftModules)) - 15) / 4;
 
 		// not a valid corner
-		if (Version < 1 || Version > 40)
+		if (version < 1 || version > 40)
 			throw new ApplicationException("Corner is not valid (version number must be 1 to 40)");
 
 		// exit with version number
-		return Version;
+		return version;
 	}
 }

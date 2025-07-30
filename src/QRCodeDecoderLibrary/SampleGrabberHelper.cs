@@ -59,60 +59,60 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 	/// <summary>
 	///     Flag means should helper store (buffer) samples of current frame or not.
 	/// </summary>
-	private readonly bool m_bBufferSamplesOfCurrentFrame;
+	private readonly bool _mBBufferSamplesOfCurrentFrame;
 
 	/// <summary>
 	///     Flag to wait for the async job to finish.
 	/// </summary>
-	private readonly ManualResetEvent m_PictureReady;
+	private readonly ManualResetEvent _mPictureReady;
 
 	/// <summary>
 	///     Flag indicates we want to store a frame.
 	/// </summary>
-	private volatile bool m_bWantOneFrame;
+	private volatile bool _mBWantOneFrame;
 
 	/// <summary>
 	///     Size of frame in bytes.
 	/// </summary>
-	private int m_ImageSize;
+	private int _mImageSize;
 
 	/// <summary>
 	///     Buffer for bitmap data.  Always release by caller.
 	/// </summary>
-	private IntPtr m_ipBuffer = IntPtr.Zero;
+	private IntPtr _mIpBuffer = IntPtr.Zero;
 
 	/// <summary>
 	///     Pointer to COM-interface ISampleGrabber.
 	/// </summary>
-	private ISampleGrabber m_SampleGrabber;
+	private ISampleGrabber _mSampleGrabber;
 
 	/// <summary>
 	///     Video frame bits per pixel.
 	/// </summary>
-	private int m_videoBitCount;
+	private int _mVideoBitCount;
 
 	/// <summary>
 	///     Video frame height. Calculated once in constructor for perf.
 	/// </summary>
-	private int m_videoHeight;
+	private int _mVideoHeight;
 
 	/// <summary>
 	///     Video frame width. Calculated once in constructor for perf.
 	/// </summary>
-	private int m_videoWidth;
+	private int _mVideoWidth;
 
 	/// <summary>
 	///     Default constructor for <see cref="SampleGrabberHelper" /> class.
 	/// </summary>
 	/// <param name="sampleGrabber">Pointer to COM-interface ISampleGrabber.</param>
 	/// <param name="buffer_samples_of_current_frame">Flag means should helper store (buffer) samples of current frame or not.</param>
-	public SampleGrabberHelper(ISampleGrabber sampleGrabber, bool buffer_samples_of_current_frame)
+	public SampleGrabberHelper(ISampleGrabber sampleGrabber, bool bufferSamplesOfCurrentFrame)
 	{
-		m_SampleGrabber = sampleGrabber;
-		m_bBufferSamplesOfCurrentFrame = buffer_samples_of_current_frame;
+		_mSampleGrabber = sampleGrabber;
+		_mBBufferSamplesOfCurrentFrame = bufferSamplesOfCurrentFrame;
 
 		// tell the callback to ignore new images
-		m_PictureReady = new ManualResetEvent(false);
+		_mPictureReady = new ManualResetEvent(false);
 	}
 
 	/// <summary>
@@ -120,14 +120,14 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 	/// </summary>
 	public void Dispose()
 	{
-		if (m_PictureReady != null) m_PictureReady.Close();
-		m_SampleGrabber = null;
+		if (_mPictureReady != null) _mPictureReady.Close();
+		_mSampleGrabber = null;
 	}
 
 	/// <summary>
 	///     SampleCB callback (NOT USED). It should be implemented for ISampleGrabberCB
 	/// </summary>
-	int ISampleGrabberCB.SampleCB(double SampleTime, IMediaSample pSample)
+	int ISampleGrabberCB.SampleCB(double sampleTime, IMediaSample pSample)
 	{
 		Marshal.ReleaseComObject(pSample);
 		return 0;
@@ -137,23 +137,23 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 	///     BufferCB callback
 	/// </summary>
 	/// <remarks>COULD BE EXECUTED FROM FOREIGN THREAD.</remarks>
-	int ISampleGrabberCB.BufferCB(double SampleTime, IntPtr pBuffer, int BufferLen)
+	int ISampleGrabberCB.BufferCB(double sampleTime, IntPtr pBuffer, int bufferLen)
 	{
 		// Note that we depend on only being called once per call to Click.  Otherwise
 		// a second call can overwrite the previous image.
-		Debug.Assert(BufferLen == Math.Abs(m_videoBitCount / 8 * m_videoWidth) * m_videoHeight,
+		Debug.Assert(bufferLen == Math.Abs(_mVideoBitCount / 8 * _mVideoWidth) * _mVideoHeight,
 			"Incorrect buffer length");
 
-		if (m_bWantOneFrame)
+		if (_mBWantOneFrame)
 		{
-			m_bWantOneFrame = false;
-			Debug.Assert(m_ipBuffer != IntPtr.Zero, "Unitialized buffer");
+			_mBWantOneFrame = false;
+			Debug.Assert(_mIpBuffer != IntPtr.Zero, "Unitialized buffer");
 
 			// Save the buffer
-			CopyMemory(m_ipBuffer, pBuffer, BufferLen);
+			CopyMemory(_mIpBuffer, pBuffer, bufferLen);
 
 			// Picture is ready.
-			m_PictureReady.Set();
+			_mPictureReady.Set();
 		}
 
 		return 0;
@@ -164,16 +164,16 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 	/// </summary>
 	public void ConfigureMode()
 	{
-		AMMediaType media = new();
+		AmMediaType media = new();
 
 		// Set the media type to Video/RBG24
 		media.majorType = MediaType.Video;
-		media.subType = MediaSubType.RGB24;
+		media.subType = MediaSubType.Rgb24;
 		media.formatType = FormatType.VideoInfo;
-		var hr = m_SampleGrabber.SetMediaType(media);
-		DsError.ThrowExceptionForHR(hr);
+		var hr = _mSampleGrabber.SetMediaType(media);
+		DsError.ThrowExceptionForHr(hr);
 
-		DsUtils.FreeAMMediaType(media);
+		DsUtils.FreeAmMediaType(media);
 
 		// Configure the samplegrabber
 
@@ -181,18 +181,18 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 		// ISampleGrabber::SetCallback method
 		// Note  [Deprecated. This API may be removed from future releases of Windows.]
 		// http://msdn.microsoft.com/en-us/library/windows/desktop/dd376992%28v=vs.85%29.aspx
-		hr = m_SampleGrabber.SetCallback(this,
+		hr = _mSampleGrabber.SetCallback(this,
 			1); // 1 == WhichMethodToCallback, call the ISampleGrabberCB::BufferCB method
-		DsError.ThrowExceptionForHR(hr);
+		DsError.ThrowExceptionForHr(hr);
 
 		// To save current frame via SnapshotCurrentFrame
-		if (m_bBufferSamplesOfCurrentFrame)
+		if (_mBBufferSamplesOfCurrentFrame)
 		{
 			//ISampleGrabber::SetBufferSamples method
 			// Note  [Deprecated. This API may be removed from future releases of Windows.]
 			// http://msdn.microsoft.com/en-us/windows/dd376991
-			hr = m_SampleGrabber.SetBufferSamples(true);
-			DsError.ThrowExceptionForHR(hr);
+			hr = _mSampleGrabber.SetBufferSamples(true);
+			DsError.ThrowExceptionForHr(hr);
 		}
 	}
 
@@ -202,26 +202,26 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 	public void SaveMode()
 	{
 		// Get the media type from the SampleGrabber
-		AMMediaType media = new();
+		AmMediaType media = new();
 
-		var hr = m_SampleGrabber.GetConnectedMediaType(media);
-		DsError.ThrowExceptionForHR(hr);
+		var hr = _mSampleGrabber.GetConnectedMediaType(media);
+		DsError.ThrowExceptionForHr(hr);
 
 		if (media.formatType != FormatType.VideoInfo || media.formatPtr == IntPtr.Zero)
 			throw new NotSupportedException("Unknown Grabber Media Format");
 
 		// Grab the size info
 		var videoInfoHeader = (VideoInfoHeader)Marshal.PtrToStructure(media.formatPtr, typeof(VideoInfoHeader));
-		m_videoWidth = videoInfoHeader.BmiHeader.Width;
-		m_videoHeight = videoInfoHeader.BmiHeader.Height;
-		m_videoBitCount = videoInfoHeader.BmiHeader.BitCount;
-		m_ImageSize = videoInfoHeader.BmiHeader.ImageSize;
+		_mVideoWidth = videoInfoHeader.BmiHeader.Width;
+		_mVideoHeight = videoInfoHeader.BmiHeader.Height;
+		_mVideoBitCount = videoInfoHeader.BmiHeader.BitCount;
+		_mImageSize = videoInfoHeader.BmiHeader.ImageSize;
 
-		DsUtils.FreeAMMediaType(media);
+		DsUtils.FreeAmMediaType(media);
 	}
 
 	[DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory")]
-	public static extern void CopyMemory(IntPtr Destination, IntPtr Source, [MarshalAs(UnmanagedType.U4)] int Length);
+	public static extern void CopyMemory(IntPtr destination, IntPtr source, [MarshalAs(UnmanagedType.U4)] int length);
 
 	/// <summary>
 	///     Makes a snapshot of next frame
@@ -229,14 +229,14 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 	/// <returns>Bitmap with snapshot</returns>
 	public Bitmap SnapshotNextFrame()
 	{
-		if (m_SampleGrabber == null) throw new ApplicationException("SampleGrabber was not initialized");
+		if (_mSampleGrabber == null) throw new ApplicationException("SampleGrabber was not initialized");
 
 		// capture image
 		var ip = GetNextFrame();
 
 		if (ip == IntPtr.Zero) throw new ApplicationException("Can not snap next frame");
 
-		var pixelFormat = m_videoBitCount switch
+		var pixelFormat = _mVideoBitCount switch
 		{
 			24 => PixelFormat.Format24bppRgb,
 			32 => PixelFormat.Format32bppRgb,
@@ -244,17 +244,17 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 			_ => throw new ApplicationException("Unsupported BitCount")
 		};
 
-		Bitmap bitmap = new(m_videoWidth, m_videoHeight, m_videoBitCount / 8 * m_videoWidth, pixelFormat, ip);
+		Bitmap bitmap = new(_mVideoWidth, _mVideoHeight, _mVideoBitCount / 8 * _mVideoWidth, pixelFormat, ip);
 
-		var bitmap_clone = bitmap.Clone(new Rectangle(0, 0, m_videoWidth, m_videoHeight), PixelFormat.Format24bppRgb);
-		bitmap_clone.RotateFlip(RotateFlipType.RotateNoneFlipY);
+		var bitmapClone = bitmap.Clone(new Rectangle(0, 0, _mVideoWidth, _mVideoHeight), PixelFormat.Format24bppRgb);
+		bitmapClone.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
 		// Release any previous buffer
 		if (ip != IntPtr.Zero) Marshal.FreeCoTaskMem(ip);
 
 		bitmap.Dispose();
 
-		return bitmap_clone;
+		return bitmapClone;
 	}
 
 	/// <summary>
@@ -263,26 +263,26 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 	/// <returns>Bitmap with snapshot</returns>
 	public Bitmap SnapshotCurrentFrame()
 	{
-		if (m_SampleGrabber == null) throw new ApplicationException("SampleGrabber was not initialized");
+		if (_mSampleGrabber == null) throw new ApplicationException("SampleGrabber was not initialized");
 
-		if (!m_bBufferSamplesOfCurrentFrame)
+		if (!_mBBufferSamplesOfCurrentFrame)
 			throw new ApplicationException(
 				"SampleGrabberHelper was created without buffering-mode (buffer of current frame)");
 
 		// capture image
 		var ip = GetCurrentFrame();
 
-		var pixelFormat = m_videoBitCount switch
+		var pixelFormat = _mVideoBitCount switch
 		{
 			24 => PixelFormat.Format24bppRgb,
 			32 => PixelFormat.Format32bppRgb,
 			48 => PixelFormat.Format48bppRgb,
 			_ => throw new ApplicationException("Unsupported BitCount")
 		};
-		Bitmap bitmap = new(m_videoWidth, m_videoHeight, m_videoBitCount / 8 * m_videoWidth, pixelFormat, ip);
+		Bitmap bitmap = new(_mVideoWidth, _mVideoHeight, _mVideoBitCount / 8 * _mVideoWidth, pixelFormat, ip);
 
-		var bitmap_clone = bitmap.Clone(new Rectangle(0, 0, m_videoWidth, m_videoHeight), PixelFormat.Format24bppRgb);
-		bitmap_clone.RotateFlip(RotateFlipType.RotateNoneFlipY);
+		var bitmapClone = bitmap.Clone(new Rectangle(0, 0, _mVideoWidth, _mVideoHeight), PixelFormat.Format24bppRgb);
+		bitmapClone.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
 
 		// Release any previous buffer
@@ -290,7 +290,7 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 
 		bitmap.Dispose();
 
-		return bitmap_clone;
+		return bitmapClone;
 	}
 
 	/// <summary>
@@ -303,26 +303,26 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 	private IntPtr GetNextFrame()
 	{
 		// get ready to wait for new image
-		m_PictureReady.Reset();
-		m_ipBuffer = Marshal.AllocCoTaskMem(Math.Abs(m_videoBitCount / 8 * m_videoWidth) * m_videoHeight);
+		_mPictureReady.Reset();
+		_mIpBuffer = Marshal.AllocCoTaskMem(Math.Abs(_mVideoBitCount / 8 * _mVideoWidth) * _mVideoHeight);
 
 		try
 		{
-			m_bWantOneFrame = true;
+			_mBWantOneFrame = true;
 
 			// Start waiting
-			if (!m_PictureReady.WaitOne(5000, false))
+			if (!_mPictureReady.WaitOne(5000, false))
 				throw new ApplicationException("Timeout while waiting to get a snapshot");
 		}
 		catch
 		{
-			Marshal.FreeCoTaskMem(m_ipBuffer);
-			m_ipBuffer = IntPtr.Zero;
+			Marshal.FreeCoTaskMem(_mIpBuffer);
+			_mIpBuffer = IntPtr.Zero;
 			throw;
 		}
 
 		// Got one
-		return m_ipBuffer;
+		return _mIpBuffer;
 	}
 
 	/// <summary>
@@ -333,7 +333,7 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 	/// <returns>A pointer to the raw pixel data</returns>
 	private IntPtr GetCurrentFrame()
 	{
-		if (!m_bBufferSamplesOfCurrentFrame)
+		if (!_mBBufferSamplesOfCurrentFrame)
 			throw new ApplicationException(
 				"SampleGrabberHelper was created without buffering-mode (buffer of current frame)");
 
@@ -341,16 +341,16 @@ internal sealed class SampleGrabberHelper : ISampleGrabberCB, IDisposable
 		var iBuffSize = 0;
 
 		// Read the buffer size
-		var hr = m_SampleGrabber.GetCurrentBuffer(ref iBuffSize, ip);
-		DsError.ThrowExceptionForHR(hr);
+		var hr = _mSampleGrabber.GetCurrentBuffer(ref iBuffSize, ip);
+		DsError.ThrowExceptionForHr(hr);
 
-		Debug.Assert(iBuffSize == m_ImageSize, "Unexpected buffer size");
+		Debug.Assert(iBuffSize == _mImageSize, "Unexpected buffer size");
 
 		// Allocate the buffer and read it
 		ip = Marshal.AllocCoTaskMem(iBuffSize);
 
-		hr = m_SampleGrabber.GetCurrentBuffer(ref iBuffSize, ip);
-		DsError.ThrowExceptionForHR(hr);
+		hr = _mSampleGrabber.GetCurrentBuffer(ref iBuffSize, ip);
+		DsError.ThrowExceptionForHr(hr);
 
 		return ip;
 	}

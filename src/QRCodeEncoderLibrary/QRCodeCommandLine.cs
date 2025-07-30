@@ -68,121 +68,121 @@ public static class QRCodeCommandLine
 	/// <summary>
 	///     Encode QRCode using command line class
 	/// </summary>
-	/// <param name="CommandLine">Command line text</param>
+	/// <param name="commandLine">Command line text</param>
 	public static void Encode
 	(
-		string CommandLine
+		string commandLine
 	)
 	{
 		// command line has no quote characters
-		if (CommandLine.IndexOf('"') < 0)
+		if (commandLine.IndexOf('"') < 0)
 		{
-			Encode(CommandLine.Split(new[] { ' ' }));
+			Encode(commandLine.Split(new[] { ' ' }));
 			return;
 		}
 
 		// command line has quote characters
-		List<string> Args = new();
-		var Ptr = 0;
-		int Ptr1;
-		int Ptr2;
+		List<string> args = new();
+		var ptr = 0;
+		int ptr1;
+		int ptr2;
 		for (;;)
 		{
 			// skip white
-			for (; Ptr < CommandLine.Length && CommandLine[Ptr] == ' '; Ptr++) ;
-			if (Ptr == CommandLine.Length) break;
+			for (; ptr < commandLine.Length && commandLine[ptr] == ' '; ptr++) ;
+			if (ptr == commandLine.Length) break;
 
 			// test for quote
-			if (CommandLine[Ptr] == '"')
+			if (commandLine[ptr] == '"')
 			{
 				// look for next quote
-				Ptr++;
-				Ptr1 = CommandLine.IndexOf('"', Ptr);
-				if (Ptr1 < 0) throw new ApplicationException("Unbalanced double quote");
-				Ptr2 = Ptr1 + 1;
+				ptr++;
+				ptr1 = commandLine.IndexOf('"', ptr);
+				if (ptr1 < 0) throw new ApplicationException("Unbalanced double quote");
+				ptr2 = ptr1 + 1;
 			}
 			else
 			{
 				// look for next white
-				Ptr1 = CommandLine.IndexOf(' ', Ptr);
-				if (Ptr1 < 0) Ptr1 = CommandLine.Length;
-				Ptr2 = Ptr1;
+				ptr1 = commandLine.IndexOf(' ', ptr);
+				if (ptr1 < 0) ptr1 = commandLine.Length;
+				ptr2 = ptr1;
 			}
 
-			Args.Add(CommandLine[Ptr..Ptr1]);
-			Ptr = Ptr2;
+			args.Add(commandLine[ptr..ptr1]);
+			ptr = ptr2;
 		}
 
-		Encode(Args.ToArray());
+		Encode(args.ToArray());
 	}
 
 	/// <summary>
 	///     Command line encode
 	/// </summary>
-	/// <param name="Args">Arguments array</param>
+	/// <param name="args">Arguments array</param>
 	private static void Encode
 	(
-		string[] Args
+		string[] args
 	)
 	{
 		// help
-		if (Args == null || Args.Length < 2)
+		if (args == null || args.Length < 2)
 			throw new ApplicationException(Help);
 
-		var TextFile = false;
-		string InputFileName = null;
-		string OutputFileName = null;
-		string Code;
-		string Value;
-		var ErrCorr = ErrorCorrection.M;
-		var ModuleSize = 2;
-		var QuietZone = 8;
-		var ECIValue = -1;
+		var textFile = false;
+		string inputFileName = null;
+		string outputFileName = null;
+		string code;
+		string value;
+		var errCorr = ErrorCorrection.M;
+		var moduleSize = 2;
+		var quietZone = 8;
+		var eciValue = -1;
 
-		for (var ArgPtr = 1; ArgPtr < Args.Length; ArgPtr++)
+		for (var argPtr = 1; argPtr < args.Length; argPtr++)
 		{
-			var Arg = Args[ArgPtr];
+			var arg = args[argPtr];
 
 			// file name
-			if (Arg[0] != '/' && Arg[0] != '-')
+			if (arg[0] != '/' && arg[0] != '-')
 			{
-				if (InputFileName == null)
+				if (inputFileName == null)
 				{
-					InputFileName = Arg;
+					inputFileName = arg;
 					continue;
 				}
 
-				if (OutputFileName == null)
+				if (outputFileName == null)
 				{
-					OutputFileName = Arg;
+					outputFileName = arg;
 					continue;
 				}
 
-				throw new ApplicationException(string.Format("Invalid option. Argument={0}", ArgPtr + 1));
+				throw new ApplicationException(string.Format("Invalid option. Argument={0}", argPtr + 1));
 			}
 
 			// search for colon
-			var Ptr = Arg.IndexOf(':');
-			if (Ptr < 0) Ptr = Arg.IndexOf('=');
-			if (Ptr > 0)
+			var ptr = arg.IndexOf(':');
+			if (ptr < 0) ptr = arg.IndexOf('=');
+			if (ptr > 0)
 			{
-				Code = Arg[1..Ptr];
-				Value = Arg[(Ptr + 1)..];
+				code = arg[1..ptr];
+				value = arg[(ptr + 1)..];
 			}
 			else
 			{
-				Code = Arg[1..];
-				Value = string.Empty;
+				code = arg[1..];
+				value = string.Empty;
 			}
 
-			Code = Code.ToLower();
-			Value = Value.ToLower();
+			code = code.ToLower();
+			value = value.ToLower();
 
-			switch (Code)
+			switch (code)
 			{
 				case "error":
 				case "e":
-					ErrCorr = Value switch
+					errCorr = value switch
 					{
 						"low" or "l" => ErrorCorrection.L,
 						"medium" or "m" => ErrorCorrection.M,
@@ -194,49 +194,49 @@ public static class QRCodeCommandLine
 
 				case "module":
 				case "m":
-					if (!int.TryParse(Value, out ModuleSize)) ModuleSize = -1;
+					if (!int.TryParse(value, out moduleSize)) moduleSize = -1;
 					break;
 
 				case "quiet":
 				case "q":
-					if (!int.TryParse(Value, out QuietZone)) QuietZone = -1;
+					if (!int.TryParse(value, out quietZone)) quietZone = -1;
 					break;
 
 				case "value":
 				case "v":
-					if (!int.TryParse(Value, out ECIValue)) ECIValue = -1;
+					if (!int.TryParse(value, out eciValue)) eciValue = -1;
 					break;
 
 				case "text":
 				case "t":
-					TextFile = true;
+					textFile = true;
 					break;
 
 				default:
-					throw new ApplicationException(string.Format("Invalid argument no {0}, code {1}", ArgPtr + 1,
-						Code));
+					throw new ApplicationException(string.Format("Invalid argument no {0}, code {1}", argPtr + 1,
+						code));
 			}
 		}
 
-		bool[,] QRCodeMatrix;
+		bool[,] qrCodeMatrix;
 
-		QREncoder Encoder = new();
-		Encoder.ErrorCorrection = ErrCorr;
-		if (ECIValue != -1) Encoder.ECIAssignValue = ECIValue;
-		if (TextFile)
+		QREncoder encoder = new();
+		encoder.ErrorCorrection = errCorr;
+		if (eciValue != -1) encoder.EciAssignValue = eciValue;
+		if (textFile)
 		{
-			var InputText = File.ReadAllText(InputFileName);
-			QRCodeMatrix = Encoder.Encode(InputText);
+			var inputText = File.ReadAllText(inputFileName);
+			qrCodeMatrix = encoder.Encode(inputText);
 		}
 		else
 		{
-			var InputBytes = File.ReadAllBytes(InputFileName);
-			QRCodeMatrix = Encoder.Encode(InputBytes);
+			var inputBytes = File.ReadAllBytes(inputFileName);
+			qrCodeMatrix = encoder.Encode(inputBytes);
 		}
 
-		QRSavePngImage PngImage = new(QRCodeMatrix);
-		if (ModuleSize != -1) PngImage.ModuleSize = ModuleSize;
-		if (QuietZone != -1) PngImage.QuietZone = QuietZone;
-		PngImage.SaveQRCodeToPngFile(OutputFileName);
+		QRSavePngImage pngImage = new(qrCodeMatrix);
+		if (moduleSize != -1) pngImage.ModuleSize = moduleSize;
+		if (quietZone != -1) pngImage.QuietZone = quietZone;
+		pngImage.SaveQRCodeToPngFile(outputFileName);
 	}
 }
