@@ -286,6 +286,8 @@ public class QRDecoder
 	{
 #if DEBUG
 		int start;
+		File.Create("Trace.txt").Close();
+		QRCodeTrace.Open("Trace.txt");
 #endif
 		try
 		{
