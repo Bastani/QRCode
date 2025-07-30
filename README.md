@@ -1,4 +1,4 @@
-# QRCode - Cross-Platform
+# QRCodeSkia
 This is a fork of the QRCode library that has been modified to remove references of Windows Forms and instead use SkiaSharp so that it is cross-platform.
 
 Original Readme -
