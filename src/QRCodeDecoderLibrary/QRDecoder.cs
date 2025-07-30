@@ -480,7 +480,8 @@ public class QRDecoder
 	    var grayLevel = new int[256];
 
 	    // convert to gray
-	    var delta = scanLineWidth - 3 * ImageWidth;
+	    var bpp = inputImage.BytesPerPixel;
+	    var delta = scanLineWidth - bpp * ImageWidth;
 	    var bitmapPtr = 0;
 	    for (var row = 0; row < ImageHeight; row++)
 	    {
@@ -495,7 +496,7 @@ public class QRDecoder
 		                      11 * bitmapArray[bitmapPtr + 2]) / 100;
 	            grayLevel[module]++;
 	            grayImage[row, col] = (byte)module;
-	            bitmapPtr += 3;
+	            bitmapPtr += bpp;
 	        }
 	        
 	        bitmapPtr += delta;
