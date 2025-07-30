@@ -1,17 +1,11 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodeConsoleDemo", "src\QRCodeConsoleDemo\QRCodeConsoleDemo.csproj", "{23111D28-E91A-497D-9190-DC3681B822A2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodeDecoderLibrary", "src\QRCodeDecoderLibrary\QRCodeDecoderLibrary.csproj", "{27A5AD0D-110F-4A05-88ED-B5821FB2387A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QRCodeEncoderLibrary", "src\QRCodeEncoderLibrary\QRCodeEncoderLibrary.csproj", "{56C44759-084A-451A-8764-05EC31C4FB3C}"
 EndProject
 Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{23111D28-E91A-497D-9190-DC3681B822A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{23111D28-E91A-497D-9190-DC3681B822A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{23111D28-E91A-497D-9190-DC3681B822A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{23111D28-E91A-497D-9190-DC3681B822A2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{27A5AD0D-110F-4A05-88ED-B5821FB2387A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{27A5AD0D-110F-4A05-88ED-B5821FB2387A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27A5AD0D-110F-4A05-88ED-B5821FB2387A}.Release|Any CPU.ActiveCfg = Release|Any CPU
