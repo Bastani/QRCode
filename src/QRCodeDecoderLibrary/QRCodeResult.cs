@@ -41,42 +41,40 @@
 //	For version history please refer to QRDecoder.cs
 /////////////////////////////////////////////////////////////////////
 
-namespace QRCodeDecoderLibrary
+namespace QRCodeDecoderLibrary;
+
+public class QRCodeResult
+{
+	/// <summary>
+	///     QR Code Data array
+	/// </summary>
+	public byte[] DataArray;
+
+	/// <summary>
+	///     ECI Assignment Value
+	/// </summary>
+	public int ECIAssignValue;
+
+	/// <summary>
+	///     QR Code error correction code (L, M, Q, H)
+	/// </summary>
+	public ErrorCorrection ErrorCorrection;
+
+	/// <summary>
+	///     QR Code matrix dimension in bits
+	/// </summary>
+	public int QRCodeDimension;
+
+	/// <summary>
+	///     QR Code matrix version
+	/// </summary>
+	public int QRCodeVersion;
+
+	public QRCodeResult
+	(
+		byte[] DataArray
+	)
 	{
-	public class QRCodeResult
-		{
-		/// <summary>
-		/// QR Code Data array
-		/// </summary>
-		public byte[] DataArray;
-
-		/// <summary>
-		/// ECI Assignment Value
-		/// </summary>
-		public int ECIAssignValue;
-
-		/// <summary>
-		/// QR Code matrix version
-		/// </summary>
-		public int QRCodeVersion;
-
-		/// <summary>
-		/// QR Code matrix dimension in bits
-		/// </summary>
-		public int QRCodeDimension;
-
-		/// <summary>
-		/// QR Code error correction code (L, M, Q, H)
-		/// </summary>
-		public ErrorCorrection ErrorCorrection;
-
-		public QRCodeResult
-				(
-				byte[] DataArray
-				)
-			{
-			this.DataArray = DataArray;
-			return;
-			}
-		}
+		this.DataArray = DataArray;
 	}
+}
