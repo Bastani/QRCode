@@ -28,11 +28,7 @@
 //	For full version history please look at QREncoder.cs
 /////////////////////////////////////////////////////////////////////
 
-using System.Drawing;
-using System.Drawing.Imaging;
-using Bitmap = System.Drawing.Bitmap;
-using Brush = System.Drawing.Brush;
-using Brushes = System.Drawing.Brushes;
+using SkiaSharp;
 
 namespace QRCodeEncoderLibrary;
 
@@ -119,26 +115,26 @@ public class QRSaveBitmapImage
 	/// <summary>
 	///     White brush (default white)
 	/// </summary>
-	public Brush WhiteBrush { get; set; } = Brushes.White;
+	public SKColor WhiteBrush { get; set; } = SKColors.White;
 
 	/// <summary>
 	///     Black brush (default black)
 	/// </summary>
-	public Brush BlackBrush { get; set; } = Brushes.Black;
+	public SKColor BlackBrush { get; set; } = SKColors.Black;
 
 	/// <summary>
 	///     Create QR Code Bitmap image from boolean black and white matrix
 	/// </summary>
 	/// <returns>QRCode image</returns>
-	public Bitmap CreateQRCodeBitmap()
+	public SKBitmap CreateQRCodeBitmap()
 	{
 		// image dimension
 		_qrCodeImageDimension = ModuleSize * _qrCodeDimension + 2 * QuietZone;
 
 		// create picture object and make it white
-		Bitmap image = new(_qrCodeImageDimension, _qrCodeImageDimension);
-		var graphics = Graphics.FromImage(image);
-		graphics.FillRectangle(WhiteBrush, 0, 0, _qrCodeImageDimension, _qrCodeImageDimension);
+		SKBitmap image = new(_qrCodeImageDimension, _qrCodeImageDimension);
+		using var canvas = new SKCanvas(image);
+		canvas.Clear(WhiteBrush);
 
 		// x and y image pointers
 		var xOffset = QuietZone;
@@ -151,7 +147,7 @@ public class QRSaveBitmapImage
 			{
 				// bar is black
 				if (_qrCodeMatrix[row, col])
-					graphics.FillRectangle(BlackBrush, xOffset, yOffset, ModuleSize, ModuleSize);
+					canvas.DrawRect(xOffset, yOffset, ModuleSize, ModuleSize, new SKPaint { Color = BlackBrush } );
 				xOffset += ModuleSize;
 			}
 
@@ -170,7 +166,7 @@ public class QRSaveBitmapImage
 	public void SaveQRCodeToImageFile
 	(
 		string fileName,
-		ImageFormat format
+		SKEncodedImageFormat format
 	)
 	{
 		// exceptions
@@ -179,9 +175,11 @@ public class QRSaveBitmapImage
 
 		// create Bitmap
 		var imageBitmap = CreateQRCodeBitmap();
-
+		
 		// save bitmap
-		imageBitmap.Save(fileName, format);
+		var data = imageBitmap.Encode(format, 100);
+		using var fileStream = File.OpenWrite(fileName);
+		data.SaveTo(fileStream);;
 	}
 
 	/// <summary>
@@ -191,7 +189,7 @@ public class QRSaveBitmapImage
 	public void SaveQRCodeToImageFile
 	(
 		Stream outputStream,
-		ImageFormat format
+		SKEncodedImageFormat format
 	)
 	{
 		// exceptions
@@ -202,7 +200,8 @@ public class QRSaveBitmapImage
 		var imageBitmap = CreateQRCodeBitmap();
 
 		// write to stream 
-		imageBitmap.Save(outputStream, format);
+		var data = imageBitmap.Encode(format, 100);
+		data.SaveTo(outputStream);
 
 		// flush all buffers
 		outputStream.Flush();
